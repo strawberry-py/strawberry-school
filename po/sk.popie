@@ -1,0 +1,35 @@
+msgid No teacher channels are set.
+msgstr
+
+msgid Original channel
+msgstr
+
+msgid Teacher channel
+msgstr
+
+msgid Teachers
+msgstr
+
+msgid This channel is already assigned.
+msgstr
+
+msgid Teacher channel relation created.
+msgstr
+
+msgid This channel was never assigned.
+msgstr
+
+msgid Teacher channel unset.
+msgstr
+
+msgid Could not add teacher. Either the channel is not a teacher channel or this user has already been added.
+msgstr
+
+msgid Teacher added.
+msgstr
+
+msgid Could not remove teacher that was not there in the first place.
+msgstr
+
+msgid Teacher removed.
+msgstr
