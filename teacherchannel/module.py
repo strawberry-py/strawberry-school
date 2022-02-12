@@ -17,13 +17,13 @@ class TeacherChannel(commands.Cog):
         self.load_deltas.start()
 
     @commands.guild_only()
-    @commands.check(check.acl)
+    @check.acl2(check.ACLevel.SUBMOD)
     @commands.group(name="teacherchannel")
     async def teacherchannel_(self, ctx):
         """Syncing teacher channels' permissions."""
         await utils.discord.send_help(ctx)
 
-    @commands.check(check.acl)
+    @check.acl2(check.ACLevel.SUBMOD)
     @teacherchannel_.command(name="list")
     async def teacherchannel_list(self, ctx):
         """List active teacher channels."""
@@ -60,7 +60,7 @@ class TeacherChannel(commands.Cog):
         for page in table:
             await ctx.send("```" + page + "```")
 
-    @commands.check(check.acl)
+    @check.acl2(check.ACLevel.SUBMOD)
     @teacherchannel_.command(name="set", aliases=["add"])
     async def teacherchannel_set(
         self, ctx, master: nextcord.TextChannel, slave: nextcord.TextChannel
@@ -81,7 +81,7 @@ class TeacherChannel(commands.Cog):
             f"Teacher channel relation created. Master: #{master.name}, slave: #{slave.name}.",
         )
 
-    @commands.check(check.acl)
+    @check.acl2(check.ACLevel.SUBMOD)
     @teacherchannel_.command(name="unset", aliases=["remove", "delete"])
     async def teacherchannel_unset(self, ctx, channel: nextcord.TextChannel):
         """Remove teacherchannel relation.
@@ -99,13 +99,13 @@ class TeacherChannel(commands.Cog):
             f"Teacher channel relation of channel {channel.name} unset.",
         )
 
-    @commands.check(check.acl)
+    @check.acl2(check.ACLevel.SUBMOD)
     @teacherchannel_.group(name="teacher")
     async def teacherchannel_teacher(self, ctx):
         """Manipulation with teachers of a teacher channel. Subcommands: **add** | **remove**."""
         await utils.discord.send_help(ctx)
 
-    @commands.check(check.acl)
+    @check.acl2(check.ACLevel.SUBMOD)
     @teacherchannel_teacher.command(name="add", aliases=["set"])
     async def teacherchannel_teacher_add(
         self, ctx, channel: nextcord.TextChannel, teacher: nextcord.Member
@@ -135,7 +135,7 @@ class TeacherChannel(commands.Cog):
             f"Teacher {teacher.display_name} added to teacher channel {channel.name}.",
         )
 
-    @commands.check(check.acl)
+    @check.acl2(check.ACLevel.SUBMOD)
     @teacherchannel_teacher.command(name="remove", aliases=["unset", "delete"])
     async def teacherchannel_teacher_remove(
         self, ctx, channel: nextcord.TextChannel, teacher: nextcord.Member
