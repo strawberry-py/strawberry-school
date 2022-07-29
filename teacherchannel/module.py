@@ -1,5 +1,5 @@
-import nextcord
-from nextcord.ext import tasks, commands
+import discord
+from discord.ext import tasks, commands
 
 import pie.database.config
 from pie import check, i18n, logger, utils
@@ -63,7 +63,7 @@ class TeacherChannel(commands.Cog):
     @check.acl2(check.ACLevel.SUBMOD)
     @teacherchannel_.command(name="set", aliases=["add"])
     async def teacherchannel_set(
-        self, ctx, master: nextcord.TextChannel, slave: nextcord.TextChannel
+        self, ctx, master: discord.TextChannel, slave: discord.TextChannel
     ):
         """Create a teacherchannel relation to sync.
         Args:
@@ -83,7 +83,7 @@ class TeacherChannel(commands.Cog):
 
     @check.acl2(check.ACLevel.SUBMOD)
     @teacherchannel_.command(name="unset", aliases=["remove", "delete"])
-    async def teacherchannel_unset(self, ctx, channel: nextcord.TextChannel):
+    async def teacherchannel_unset(self, ctx, channel: discord.TextChannel):
         """Remove teacherchannel relation.
         Args:
             channel: Either slave or master channel, both have the same effect."""
@@ -108,7 +108,7 @@ class TeacherChannel(commands.Cog):
     @check.acl2(check.ACLevel.SUBMOD)
     @teacherchannel_teacher.command(name="add", aliases=["set"])
     async def teacherchannel_teacher_add(
-        self, ctx, channel: nextcord.TextChannel, teacher: nextcord.Member
+        self, ctx, channel: discord.TextChannel, teacher: discord.Member
     ):
         """Mark user as a teacher of a channel. Permission sync will not apply to this member.
         Grants permissions to the teacher channel (slave) only.
@@ -138,7 +138,7 @@ class TeacherChannel(commands.Cog):
     @check.acl2(check.ACLevel.SUBMOD)
     @teacherchannel_teacher.command(name="remove", aliases=["unset", "delete"])
     async def teacherchannel_teacher_remove(
-        self, ctx, channel: nextcord.TextChannel, teacher: nextcord.Member
+        self, ctx, channel: discord.TextChannel, teacher: discord.Member
     ):
         """Unmark user as a teacher of a channel. Permission overrides will be removed from the teacher channel (slave).
         Args:
@@ -208,10 +208,10 @@ class TeacherChannel(commands.Cog):
     @commands.Cog.listener()
     async def on_guild_channel_update(
         self,
-        channel_before: nextcord.abc.GuildChannel,
-        channel_after: nextcord.abc.GuildChannel,
+        channel_before: discord.abc.GuildChannel,
+        channel_after: discord.abc.GuildChannel,
     ):
-        if not isinstance(channel_after, nextcord.TextChannel):
+        if not isinstance(channel_after, discord.TextChannel):
             return
         teacherchannel = TeacherChannelDB.get(channel_after.guild.id, channel_after.id)
         if not teacherchannel:
@@ -222,8 +222,8 @@ class TeacherChannel(commands.Cog):
 
     async def _sync(
         self,
-        channel_before: nextcord.abc.GuildChannel,
-        channel_after: nextcord.abc.GuildChannel,
+        channel_before: discord.abc.GuildChannel,
+        channel_after: discord.abc.GuildChannel,
         teacherchannel: TeacherChannelDB,
     ) -> None:
         slave_channel = channel_after.guild.get_channel(teacherchannel.slave_id)
@@ -256,5 +256,5 @@ class TeacherChannel(commands.Cog):
                     await slave_channel.set_permissions(target, overwrite=overwrite)
 
 
-def setup(bot) -> None:
-    bot.add_cog(TeacherChannel(bot))
+async def setup(bot) -> None:
+    await bot.add_cog(TeacherChannel(bot))
