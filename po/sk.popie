@@ -1,35 +1,35 @@
 msgid No teacher channels are set.
-msgstr
+msgstr Nie sú nastavené žiadne kanály pre učiteľov.
 
 msgid Original channel
-msgstr
+msgstr Pôvodný kanál
 
 msgid Teacher channel
-msgstr
+msgstr Kanál s učiteľmi
 
 msgid Teachers
-msgstr
+msgstr Učitelia
 
 msgid This channel is already assigned.
-msgstr
+msgstr Tento kanál už bol pridelený.
 
 msgid Teacher channel relation created.
-msgstr
+msgstr Vzťah učiteľshého kanálu bol vytvorený.
 
 msgid This channel was never assigned.
-msgstr
+msgstr Tento kanál nie je nikde pridelený.
 
 msgid Teacher channel unset.
-msgstr
+msgstr Kanál s učiteľmi bol vypnutý.
 
 msgid Could not add teacher. Either the channel is not a teacher channel or this user has already been added.
-msgstr
+msgstr Učiteľ nemohol byť pridaný. Buď kanál nie je pridelený k učiteľským kanálom alebo bol tento užívateľ už pridelený.
 
 msgid Teacher added.
-msgstr
+msgstr Učiteľ pridaný.
 
 msgid Could not remove teacher that was not there in the first place.
-msgstr
+msgstr Učiteľ nebol odstránený, pretože nie je vedený ako učiteľ tohto kanálu.
 
 msgid Teacher removed.
-msgstr
+msgstr Učiteľ odstránený.
