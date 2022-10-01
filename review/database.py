@@ -17,6 +17,7 @@ from sqlalchemy import (
     UniqueConstraint,
     select,
     func,
+    exists,
 )
 
 from sqlalchemy.orm import relationship, column_property
@@ -25,6 +26,14 @@ from pie.database import database, session
 from typing import List, Optional, Union
 
 from ..school.database import Subject, Teacher
+
+
+def used_filter_generator():
+    filter = exists().where(Teacher.school_id == TeacherReview.teacher_id)
+    return filter
+
+
+Teacher.add_used_filter_generator(used_filter_generator)
 
 
 class SubjectRelevance(database.base):

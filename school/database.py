@@ -8,9 +8,10 @@ from sqlalchemy import (
     ForeignKey,
     Table,
     UniqueConstraint,
+    not_,
 )
 from sqlalchemy.orm import relationship
-from typing import Dict, List, Optional
+from typing import Boolean, Callable, Dict, List, Optional
 
 from pie.database import database, session
 
@@ -98,6 +99,38 @@ class Teacher(database.base):
         back_populates="guarantor",
     )
 
+    _used_filter_generators = []
+    _is_used_checks = []
+
+    @staticmethod
+    def add_used_filter_generator(func: Callable):
+        """Add callable to list of functions which are called
+        to get filter of used teacher.
+
+        The function must return filter statement, for example:
+
+        `stmt = exists().where(Teacher.school_ud==MyDatabaseObject.foreign_teacher_id)`
+
+        """
+        if func is None:
+            return
+
+        if func not in Teacher._used_filter_generators:
+            Teacher._used_filter_generators.append(func)
+
+    @staticmethod
+    def add_is_used_check(func: Callable):
+        """Add callable to list of functions which are called
+        to check if teacher is in use somewhere.
+
+        The function must return Boolean.
+        """
+        if func is None:
+            return
+
+        if func not in Teacher._is_used_checks:
+            Teacher._is_used_checks.append(func)
+
     @staticmethod
     def get_by_sid(ctx, school_id: int) -> Optional[Teacher]:
         query = (
@@ -136,8 +169,28 @@ class Teacher(database.base):
 
         return teacher
 
+    def is_used(self) -> Boolean:
+        for func in Teacher._is_used_checks:
+            if func():
+                return True
+
+        return False
+
     def delete(self):
         session.delete(self)
+        session.commit()
+
+    @staticmethod
+    def purge():
+        """BEWARE! Purges all teachers that are not used!"""
+
+        query = session.query(Teacher)
+
+        for func in Teacher._used_filter_generators:
+            query = query.filter(not_(func()))
+
+        query.delete(synchronize_session="fetch")
+
         session.commit()
 
     def __repr__(self) -> str:
