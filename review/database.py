@@ -28,12 +28,18 @@ from typing import List, Optional, Union
 from ..school.database import Subject, Teacher
 
 
-def used_filter_generator():
+def teacher_teacherreview_filter_generator():
     filter = exists().where(Teacher.school_id == TeacherReview.teacher_id)
     return filter
 
 
-Teacher.add_used_filter_generator(used_filter_generator)
+def teacher_subjectreview_filter_generator():
+    filter = exists().where(Teacher.school_id == SubjectReview.guarantor_id)
+    return filter
+
+
+Teacher.add_used_filter_generator(teacher_teacherreview_filter_generator)
+Teacher.add_used_filter_generator(teacher_subjectreview_filter_generator)
 
 
 class SubjectRelevance(database.base):
