@@ -1392,7 +1392,18 @@ class School(commands.Cog):
             guarantor_data = subject_data.get("guarantor", {})
             teachers_data = subject_data.get("teachers", {})
             programs_data = subject_data.get("programmes", [])
-            degree = subject_data.get("degree", None)
+            bachelors_degree = subject_data.get("bachelors_degree", False)
+            masters_degree = subject_data.get("masters_degree", False)
+            doctoral_degree = subject_data.get("doctoral_degree", False)
+
+            if bachelors_degree:
+                degree = "Bachelor"
+            elif masters_degree:
+                degree = "Masters"
+            elif doctoral_degree:
+                degree = "Doctoral"
+            else:
+                degree = None
 
             guarantor = await self._import_teachers(ctx, guarantor_data)
             teachers = await self._import_teachers(ctx, teachers_data)

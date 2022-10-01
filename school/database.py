@@ -385,30 +385,42 @@ class Subject(database.base):
         if not abbreviation:
             return None
 
-        query = (
+        subject = (
             session.query(Subject)
             .filter_by(abbreviation=abbreviation, guild_id=ctx.guild.id)
             .one_or_none()
         )
 
-        if query:
-            return query
+        if not subject:
+            subject = Subject(
+                guild_id=ctx.guild.id,
+                abbreviation=abbreviation,
+            )
 
         name = json_data.get("name", None)
         institute = json_data.get("institute", None)
-        semester = json_data.get("semester", None)
-        json_url = json_data.get("link", None)
+        winter_semester = json_data.get("winter_semester", False)
+        summer_semester = json_data.get("summer_semester", False)
 
-        subject = Subject(
-            guild_id=ctx.guild.id,
-            abbreviation=abbreviation,
-            name=name,
-            institute=institute,
-            semester=semester,
-        )
+        if winter_semester and summer_semester:
+            semester = "Both"
+        elif winter_semester:
+            semester = "Winter"
+        else:
+            semester = "Summer"
 
-        session.add(subject)
+        subject.name = name
+        subject.institute = institute
+        subject.semester = semester
+
+        session.merge(subject)
         session.flush()
+
+        query = session.query(SubjectUrl).filter_by(subject_idx=subject.idx).all()
+        for relation in query:
+            session.delete(relation)
+
+        json_url = json_data.get("link", None)
 
         for url_str in json_url:
             subject.url.append(SubjectUrl(subject_id=subject.idx, url=url_str))
