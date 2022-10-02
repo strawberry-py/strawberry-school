@@ -368,6 +368,39 @@ class School(commands.Cog):
         else:
             await ctx.send(_(ctx, "Deleting aborted."))
 
+    @check.acl2(check.ACLevel.MOD)
+    @subject_.group(name="purge")
+    async def subject_purge_(self, ctx):
+        """Purge subjects that are not used."""
+        await utils.discord.send_help(ctx)
+
+    @check.acl2(check.ACLevel.MOD)
+    @subject_purge_.command(name="list")
+    async def subject_purge_list(self, ctx):
+        """Show list of subjects used by other modules"""
+        subjects = Subject.get_used(ctx)
+
+        class Item:
+            def __init__(self, subject):
+                self.abbreviation = subject.abbreviation
+                self.name = subject.name
+
+        items: List[Item] = []
+
+        for subject in subjects:
+            items.append(Item(subject))
+
+        table: List[str] = utils.text.create_table(
+            items,
+            header={
+                "abbreviation": _(ctx, "Abbreviation"),
+                "name": _(ctx, "Subject name"),
+            },
+        )
+
+        for page in table:
+            await ctx.send("```" + page + "```")
+
     # TEACHER COMMANDS
 
     @commands.guild_only()
@@ -500,6 +533,39 @@ class School(commands.Cog):
             )
         else:
             await ctx.send(_(ctx, "Deleting aborted."))
+
+    @check.acl2(check.ACLevel.MOD)
+    @teacher_.group(name="purge")
+    async def teacher_purge_(self, ctx):
+        """Purge subjects that are not used."""
+        await utils.discord.send_help(ctx)
+
+    @check.acl2(check.ACLevel.MOD)
+    @teacher_purge_.command(name="list")
+    async def teacher_purge_list(self, ctx):
+        """Show list of subjects used by other modules"""
+        teachers = Teacher.get_used(ctx)
+
+        class Item:
+            def __init__(self, teacher):
+                self.school_id = teacher.school_id
+                self.name = teacher.name
+
+        items: List[Item] = []
+
+        for teacher in teachers:
+            items.append(Item(teacher))
+
+        table: List[str] = utils.text.create_table(
+            items,
+            header={
+                "school_id": _(ctx, "School ID"),
+                "name": _(ctx, "Teacher name"),
+            },
+        )
+
+        for page in table:
+            await ctx.send("```" + page + "```")
 
     # PROGRAM COMMANDS
 
