@@ -109,7 +109,7 @@ class Teacher(database.base):
 
         The function must return filter statement, for example:
 
-        `stmt = exists().where(Teacher.school_ud==MyDatabaseObject.foreign_teacher_id)`
+        `stmt = exists().where(Teacher.idx==MyDatabaseObject.foreign_teacher_id)`
 
         """
         if func is None:
@@ -150,14 +150,13 @@ class Teacher(database.base):
         )
         return query.all()
 
-    def edit(self, name):
-        if name:
-            self.name = name
-        session.commit()
-
     @staticmethod
     def get_or_create(ctx, school_id: int, name: str) -> Teacher:
-        query = session.query(Teacher).filter_by(school_id=school_id).one_or_none()
+        query = (
+            session.query(Teacher)
+            .filter_by(school_id=school_id, guild_id=ctx.guild.id)
+            .one_or_none()
+        )
 
         if query:
             return query
@@ -169,28 +168,42 @@ class Teacher(database.base):
 
         return teacher
 
-    def is_used(self) -> Boolean:
-        for func in Teacher._is_used_checks:
-            if func():
-                return True
-
-        return False
-
-    def delete(self):
-        session.delete(self)
-        session.commit()
-
     @staticmethod
-    def purge():
+    def purge(ctx):
         """BEWARE! Purges all teachers that are not used!"""
 
-        query = session.query(Teacher)
+        query = session.query(Teacher).filter_by(guild_id=ctx.guild.id)
 
         for func in Teacher._used_filter_generators:
             query = query.filter(not_(func()))
 
         query.delete(synchronize_session="fetch")
 
+        session.commit()
+
+    @staticmethod
+    def get_used(ctx) -> List[Teacher]:
+        query = session.query(Teacher).filter_by(guild_id=ctx.guild.id)
+
+        for func in Teacher._used_filter_generators:
+            query = query.filter(func())
+
+        return query.all()
+
+    def edit(self, name):
+        if name:
+            self.name = name
+        session.commit()
+
+    def is_used(self) -> Boolean:
+        for func in Teacher._is_used_checks:
+            if func(self):
+                return True
+
+        return False
+
+    def delete(self):
+        session.delete(self)
         session.commit()
 
     def __repr__(self) -> str:
@@ -355,8 +368,58 @@ class Subject(database.base):
         "SubjectUrl", back_populates="subject", cascade="all, delete-orphan, delete"
     )
 
-    def delete(self):
-        session.delete(self)
+    _used_filter_generators = []
+    _is_used_checks = []
+
+    @staticmethod
+    def add_used_filter_generator(func: Callable):
+        """Add callable to list of functions which are called
+        to get filter of used subjects.
+
+        The function must return filter statement, for example:
+
+        `stmt = exists().where(Subject.idx==MyDatabaseObject.foreign_teacher_id)`
+
+        """
+        if func is None:
+            return
+
+        if func not in Subject._used_filter_generators:
+            Subject._used_filter_generators.append(func)
+
+    @staticmethod
+    def add_is_used_check(func: Callable):
+        """Add callable to list of functions which are called
+        to check if subject is in use somewhere.
+
+        The function must return Boolean.
+        """
+        if func is None:
+            return
+
+        if func not in Subject._is_used_checks:
+            Subject._is_used_checks.append(func)
+
+    @staticmethod
+    def get_used(ctx) -> List[Subject]:
+        query = session.query(Subject).filter_by(guild_id=ctx.guild.id)
+
+        for func in Subject._used_filter_generators:
+            query = query.filter(func())
+
+        return query.all()
+
+    @staticmethod
+    def purge(ctx):
+        """BEWARE! Purges all subjects that are not used!"""
+
+        query = session.query(Subject).filter_by(guild_id=ctx.guild.id)
+
+        for func in Subject._used_filter_generators:
+            query = query.filter(not_(func()))
+
+        query.delete(synchronize_session="fetch")
+
         session.commit()
 
     @staticmethod
@@ -428,6 +491,17 @@ class Subject(database.base):
         session.commit()
 
         return subject
+
+    def is_used(self) -> Boolean:
+        for func in Subject._is_used_checks:
+            if func(self):
+                return True
+
+        return False
+
+    def delete(self):
+        session.delete(self)
+        session.commit()
 
     def edit(self, abbreviation, name, institute, semester, guarantor):
         if abbreviation:
