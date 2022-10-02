@@ -139,6 +139,12 @@ msgstr Opravdu chceš smazat tento předmět:
 msgid Subject {abbreviation} deleted.
 msgstr Předmět {abbreviation} smazán.
 
+msgid Abbreviation
+msgstr Zkratka
+
+msgid Subject name
+msgstr Jméno předmětu
+
 msgid No teacher with name '{name}' found.
 msgstr Žádný učitel se jménem '{name}' nenalezen.
 
@@ -150,6 +156,12 @@ msgstr Opravdu chceš smazat tohoto učitele:
 
 msgid Teacher {name} deleted.
 msgstr Učitel {name} smazán.
+
+msgid School ID
+msgstr Školní ID
+
+msgid Teacher name
+msgstr Jméno učitele
 
 msgid Degree must be B for Bachelor, M for Masters or D for Doctoral.
 msgstr Stupeň musí být B pro Bakalářský, M pro Magisterský a D pro doktorský.
@@ -252,9 +264,6 @@ msgstr Chyba zpracování argumentů:
 
 msgid Program {abbreviation}
 msgstr Program {abbreviation}
-
-msgid Abbreviation
-msgstr Zkratka
 
 msgid Degree
 msgstr Stupeň
