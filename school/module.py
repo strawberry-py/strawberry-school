@@ -378,7 +378,7 @@ class School(commands.Cog):
     @subject_purge_.command(name="list")
     async def subject_purge_list(self, ctx):
         """Show list of subjects used by other modules"""
-        subjects = Subject.get_used(ctx)
+        subjects = Subject.get_not_used(ctx)
 
         class Item:
             def __init__(self, subject):
@@ -544,7 +544,7 @@ class School(commands.Cog):
     @teacher_purge_.command(name="list")
     async def teacher_purge_list(self, ctx):
         """Show list of subjects used by other modules"""
-        teachers = Teacher.get_used(ctx)
+        teachers = Teacher.get_not_used(ctx)
 
         class Item:
             def __init__(self, teacher):

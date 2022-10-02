@@ -182,11 +182,11 @@ class Teacher(database.base):
         session.commit()
 
     @staticmethod
-    def get_used(ctx) -> List[Teacher]:
+    def get_not_used(ctx) -> List[Teacher]:
         query = session.query(Teacher).filter_by(guild_id=ctx.guild.id)
 
         for func in Teacher._used_filter_generators:
-            query = query.filter(func())
+            query = query.filter(not_(func()))
 
         return query.all()
 
@@ -401,11 +401,11 @@ class Subject(database.base):
             Subject._is_used_checks.append(func)
 
     @staticmethod
-    def get_used(ctx) -> List[Subject]:
+    def get_not_used(ctx) -> List[Subject]:
         query = session.query(Subject).filter_by(guild_id=ctx.guild.id)
 
         for func in Subject._used_filter_generators:
-            query = query.filter(func())
+            query = query.filter(not_(func()))
 
         return query.all()
 
