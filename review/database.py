@@ -38,7 +38,7 @@ def teacher_subjectreview_filter_generator():
     return filter
 
 
-def teacher_is_used(teacher: Teacher) -> Boolean:
+def teacher_is_used(teacher: Teacher) -> bool:
     query_teacher_review = (
         session.query(TeacherReview)
         .filter_by(TeacherReview.teacher_id == teacher.idx)

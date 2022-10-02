@@ -11,7 +11,7 @@ from sqlalchemy import (
     not_,
 )
 from sqlalchemy.orm import relationship
-from typing import Boolean, Callable, Dict, List, Optional
+from typing import Callable, Dict, List, Optional
 
 from pie.database import database, session
 
@@ -123,7 +123,7 @@ class Teacher(database.base):
         """Add callable to list of functions which are called
         to check if teacher is in use somewhere.
 
-        The function must return Boolean.
+        The function must return bool.
         """
         if func is None:
             return
@@ -195,7 +195,7 @@ class Teacher(database.base):
             self.name = name
         session.commit()
 
-    def is_used(self) -> Boolean:
+    def is_used(self) -> bool:
         for func in Teacher._is_used_checks:
             if func(self):
                 return True
@@ -392,7 +392,7 @@ class Subject(database.base):
         """Add callable to list of functions which are called
         to check if subject is in use somewhere.
 
-        The function must return Boolean.
+        The function must return bool.
         """
         if func is None:
             return
@@ -492,7 +492,7 @@ class Subject(database.base):
 
         return subject
 
-    def is_used(self) -> Boolean:
+    def is_used(self) -> bool:
         for func in Subject._is_used_checks:
             if func(self):
                 return True
