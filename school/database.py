@@ -143,6 +143,7 @@ class Teacher(database.base):
 
     @staticmethod
     def search(ctx, name: str) -> List[Teacher]:
+        name = name.replace("%", "")
         query = (
             session.query(Teacher)
             .filter_by(guild_id=ctx.guild.id)
@@ -424,6 +425,7 @@ class Subject(database.base):
 
     @staticmethod
     def search(ctx, name: str) -> List[Subject]:
+        name = name.replace("%", "")
         query = (
             session.query(Subject)
             .filter_by(guild_id=ctx.guild.id)
