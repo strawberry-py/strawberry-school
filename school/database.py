@@ -481,7 +481,7 @@ class Subject(database.base):
         session.merge(subject)
         session.flush()
 
-        query = session.query(SubjectUrl).filter_by(subject_idx=subject.idx).all()
+        query = session.query(SubjectUrl).filter_by(subject_id=subject.idx).all()
         for relation in query:
             session.delete(relation)
 
