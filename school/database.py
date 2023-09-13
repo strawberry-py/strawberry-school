@@ -552,7 +552,9 @@ class Subject(database.base):
         return ignored
 
     def import_programs(self, ctx, programs: Dict):
-        self.programs = []
+        self.programs.clear()
+        
+        session.commit()
 
         for program_data in programs:
             program = Program.get_or_create(
