@@ -564,6 +564,8 @@ class Subject(database.base):
                 year=program_data["year"], obligation=program_data["obligation"]
             )
             sub_prog.program = program
+            if sub_prog in self.programs:
+                continue
             self.programs.append(sub_prog)
 
         session.commit()
