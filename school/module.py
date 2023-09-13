@@ -1455,7 +1455,7 @@ class School(commands.Cog):
         """Main logic for importing school (subject) data from JSON"""
         i = 0
         for subject_data in json_data:
-            guarantor_data = subject_data.get("guarantor", {})
+            guarantors_data = subject_data.get("guarantors", {})
             teachers_data = subject_data.get("teachers", {})
             programs_data = subject_data.get("programmes", [])
             bachelors_degree = subject_data.get("bachelors_degree", False)
@@ -1471,7 +1471,7 @@ class School(commands.Cog):
             else:
                 degree = None
 
-            guarantor = await self._import_teachers(ctx, guarantor_data)
+            guarantor = await self._import_teachers(ctx, guarantors_data)
             teachers = await self._import_teachers(ctx, teachers_data)
 
             subject = Subject.from_json(ctx, subject_data)
