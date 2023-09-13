@@ -1438,8 +1438,7 @@ class School(commands.Cog):
                     spec_degree += "UNKNOWN"
                 program_data = re.sub(r"^[A-z]-", "", program_data)
             program_info = program_data.split("-")
-            programs.append(
-                {
+            program = {
                     "abbreviation": program_info[0]
                     if program_info[1] != "A"
                     else program_info[0] + "-" + program_info[1],
@@ -1447,7 +1446,8 @@ class School(commands.Cog):
                     "obligation": program_info[-1],
                     "degree": spec_degree if spec_degree else degree,
                 }
-            )
+            if not program in programs:
+                programs.append(program)
 
         return programs
 
