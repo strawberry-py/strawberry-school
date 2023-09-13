@@ -552,9 +552,7 @@ class Subject(database.base):
         return ignored
 
     def import_programs(self, ctx, programs: Dict):
-        query = session.query(SubjectProgram).filter_by(subject_idx=self.idx).all()
-        for relation in query:
-            session.delete(relation)
+        self.programs = []
 
         for program_data in programs:
             program = Program.get_or_create(
