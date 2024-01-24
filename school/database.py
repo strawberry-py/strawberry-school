@@ -463,7 +463,7 @@ class Subject(database.base):
             )
 
         name = json_data.get("name", None)
-        institute = json_data.get("institute", None)
+        institute = json_data.get("institute", ["-"])
         semesters = json_data.get("semester", [])
 
         if "winter" in semesters and "summer" in semesters:
@@ -474,7 +474,7 @@ class Subject(database.base):
             semester = "Summer"
 
         subject.name = name
-        subject.institute = institute
+        subject.institute = next(iter(institute), "-")
         subject.semester = semester
 
         session.merge(subject)
