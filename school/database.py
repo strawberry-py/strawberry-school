@@ -464,12 +464,11 @@ class Subject(database.base):
 
         name = json_data.get("name", None)
         institute = json_data.get("institute", None)
-        winter_semester = json_data.get("winter_semester", False)
-        summer_semester = json_data.get("summer_semester", False)
+        semesters = json_data.get("semester", [])
 
-        if winter_semester and summer_semester:
+        if "winter" in semesters and "summer" in semesters:
             semester = "Both"
-        elif winter_semester:
+        elif "winter" in semesters:
             semester = "Winter"
         else:
             semester = "Summer"
@@ -553,7 +552,7 @@ class Subject(database.base):
 
     def import_programs(self, ctx, programs: Dict):
         self.programs.clear()
-        
+
         session.commit()
 
         for program_data in programs:

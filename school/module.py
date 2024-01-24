@@ -1439,14 +1439,14 @@ class School(commands.Cog):
                 program_data = re.sub(r"^[A-z]-", "", program_data)
             program_info = program_data.split("-")
             program = {
-                    "abbreviation": program_info[0]
-                    if program_info[1] != "A"
-                    else program_info[0] + "-" + program_info[1],
-                    "year": program_info[-2],
-                    "obligation": program_info[-1],
-                    "degree": spec_degree if spec_degree else degree,
-                }
-            if not program in programs:
+                "abbreviation": program_info[0]
+                if program_info[1] != "A"
+                else program_info[0] + "-" + program_info[1],
+                "year": program_info[-2],
+                "obligation": program_info[-1],
+                "degree": spec_degree if spec_degree else degree,
+            }
+            if program not in programs:
                 programs.append(program)
 
         return programs
@@ -1458,15 +1458,13 @@ class School(commands.Cog):
             guarantors_data = subject_data.get("guarantors", {})
             teachers_data = subject_data.get("teachers", {})
             programs_data = subject_data.get("programmes", [])
-            bachelors_degree = subject_data.get("bachelors_degree", False)
-            masters_degree = subject_data.get("masters_degree", False)
-            doctoral_degree = subject_data.get("doctoral_degree", False)
+            degrees = subject_data.get("degree", [])
 
-            if bachelors_degree:
+            if "Bachelor" in degrees:
                 degree = "Bachelor"
-            elif masters_degree:
+            elif "Masters" in degrees:
                 degree = "Masters"
-            elif doctoral_degree:
+            elif "Doctoral" in degrees:
                 degree = "Doctoral"
             else:
                 degree = None
