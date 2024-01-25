@@ -1416,7 +1416,7 @@ class School(commands.Cog):
         """Import teachers from JSON data"""
         teachers = []
         for id, name in json_data.items():
-            teachers.append(Teacher.get_or_create(ctx, id, name))
+            teachers.append(Teacher.update_or_create(ctx, id, name))
 
         return teachers
 

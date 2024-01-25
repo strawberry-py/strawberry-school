@@ -152,15 +152,16 @@ class Teacher(database.base):
         return query.all()
 
     @staticmethod
-    def get_or_create(ctx, school_id: int, name: str) -> Teacher:
-        query = (
+    def update_or_create(ctx, school_id: int, name: str) -> Teacher:
+        teacher = (
             session.query(Teacher)
             .filter_by(school_id=school_id, guild_id=ctx.guild.id)
             .one_or_none()
         )
 
-        if query:
-            return query
+        if teacher:
+            teacher.edit(name=name)
+            return teacher
 
         teacher = Teacher(school_id=school_id, name=name, guild_id=ctx.guild.id)
 
