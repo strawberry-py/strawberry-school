@@ -530,8 +530,7 @@ class Review(commands.Cog):
     async def review_subject_add(
         self, ctx, abbreviation: str, grade: int, *, text: str
     ):
-        """Add or edit subject review. If review was lastly
-        edited before 1 month, resets relevance!
+        """Add or edit subject review. Resets relevance if review is older than 1 month.
 
         Args:
             abbreviation: Subject's abbreviation
@@ -561,8 +560,7 @@ class Review(commands.Cog):
     async def review_subject_add_anonymous(
         self, ctx, abbreviation: str, grade: int, *, text: str
     ):
-        """Add or edit anonymous subject review. If review was lastly
-        edited before 1 month, resets relevance!
+        """Add or edit anonymous subject review. Resets relevance if review is older than 1 month.
 
         Args:
             abbreviation: Subject's abbreviation
