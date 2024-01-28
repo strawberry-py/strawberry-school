@@ -752,8 +752,7 @@ class Review(commands.Cog):
     @check.acl2(check.ACLevel.MEMBER)
     @review_teacher_.command(name="add", aliases=["update"])
     async def review_teacher_add(self, ctx, teacher_id: int, grade: int, *, text: str):
-        """Add or edit teacher review. If review was lastly
-        edited before 1 month, resets relevance!
+        """Add or edit teacher review. Resets relevance if review is older than 1 month.
 
         Args:
             teacher_id: Teacher's school ID
@@ -782,8 +781,7 @@ class Review(commands.Cog):
     async def review_teacher_add_anonymous(
         self, ctx, teacher_id: int, grade: int, *, text: str
     ):
-        """Add or edit anonymous teacher review. If review was lastly
-        edited before 1 month, resets relevance!
+        """Add or edit anonymous teacher review. Resets relevance if review is older than 1 month.
 
         Args:
             teacher_id: Teacher's school ID
