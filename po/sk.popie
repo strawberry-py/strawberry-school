@@ -1,3 +1,39 @@
+msgid Cannot find specified roles, aborting.
+msgstr
+
+msgid Cannot remove role {role} from member {member}.
+msgstr
+
+msgid Successfully removed roles from {member_count} members. Continuing...
+msgstr
+
+msgid Done, removed {role_count} roles from {member_count} members
+msgstr
+
+msgid Use space-separated list of category names as an argument.
+msgstr
+
+msgid Could not delete overwrites of member {member} in the channel {channel}.
+msgstr
+
+msgid Already visited {channel_count} channels. Continuing...
+msgstr
+
+msgid Done, visited {channel_count} channels.
+msgstr
+
+msgid Input file does not match expected columns
+msgstr
+
+msgid All roles exist already.
+msgstr
+
+msgid All roles exist already
+msgstr
+
+msgid Done.
+msgstr
+
 msgid No teacher channels are set.
 msgstr Nie sú nastavené žiadne kanály pre učiteľov.
 

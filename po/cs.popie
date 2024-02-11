@@ -1,3 +1,39 @@
+msgid Cannot find specified roles, aborting.
+msgstr Role nenalezeny, ukončuji.
+
+msgid Cannot remove role {role} from member {member}.
+msgstr Nelze odstranit roli {role} uživatele {member}.
+
+msgid Successfully removed roles from {member_count} members. Continuing...
+msgstr Úspěšně odtraněny role {member_count} uživatelů. Pokračuji...
+
+msgid Done, removed {role_count} roles from {member_count} members
+msgstr Hotovo, odstraněno {role_count} rolí od {member_count} uživatelů.
+
+msgid Use space-separated list of category names as an argument.
+msgstr Použij list názvů kategorií oddělených mezerami.
+
+msgid Could not delete overwrites of member {member} in the channel {channel}.
+msgstr Nelze odstranit práva uživatele {member} v kanálu {channel}.
+
+msgid Already visited {channel_count} channels. Continuing...
+msgstr Již bylo navštíveno {channel_count} kanálů. Pokračuji...
+
+msgid Done, visited {channel_count} channels.
+msgstr Hotovo, navštíveno {channel_count} kanálů.
+
+msgid Input file does not match expected columns
+msgstr Vstupní soubor nemá správné sloupce.
+
+msgid All roles exist already.
+msgstr Všechy role již existují.
+
+msgid All roles exist already
+msgstr Všechny role již existují.
+
+msgid Done.
+msgstr Hotovo.
+
 msgid No teacher channels are set.
 msgstr Nejsou nastaveny žádné kanály pro učitele.
 
