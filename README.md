@@ -1,1 +1,1 @@
-# pumpkin-school
+# strawberry-school
