@@ -17,7 +17,7 @@ class TeacherChannel(database.base):
     master_id = Column(BigInteger, unique=True)
     slave_id = Column(BigInteger, primary_key=True, autoincrement=False)
     teachers = relationship(
-        "Teacher", cascade="all, delete-orphan", back_populates="teacherchannel"
+        lambda: Teacher, cascade="all, delete-orphan", back_populates="teacherchannel"
     )
 
     @staticmethod
