@@ -68,7 +68,8 @@ class TeacherChannel(commands.Cog):
         """Create a teacherchannel relation to sync.
         Args:
             master: Primary channel without any teacher.
-            slave: Channel that is supposed to be visible for teachers of this channel."""
+            slave: Channel that is supposed to be visible for teachers of this channel.
+        """
         config = TeacherChannelDB.add_channel(ctx.guild.id, master.id, slave.id)
         if not config:
             await ctx.reply(_(ctx, "This channel is already assigned."))
@@ -242,7 +243,7 @@ class TeacherChannel(commands.Cog):
             )
         if channel_after.overwrites != channel_before.overwrites:
             # negative change
-            for (target, overwrite) in channel_before.overwrites.items():
+            for target, overwrite in channel_before.overwrites.items():
                 if (target, overwrite) in channel_after.overwrites.items():
                     continue
                 if target.id not in [t.user_id for t in teacherchannel.teachers]:

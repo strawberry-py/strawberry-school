@@ -1,3 +1,306 @@
+msgid Your positive vote has been counted.
+msgstr
+
+msgid Your vote has been deleted.
+msgstr
+
+msgid Your negative vote has been counted.
+msgstr
+
+msgid Can't vote on own review!
+msgstr
+
+msgid You don't have permissions to vote!
+msgstr
+
+msgid Average grade:
+msgstr
+
+msgid Anonymous
+msgstr
+
+msgid Unknown user
+msgstr
+
+msgid Review for subject '{abbreviation}':
+msgstr
+
+msgid Do you want to delete review for subject '{abbreviation}'?
+msgstr
+
+msgid Review ID #{id}
+msgstr
+
+msgid **Guarantor:** {name}
+msgstr
+
+msgid Author:
+msgstr
+
+msgid Updated:
+msgstr
+
+msgid Subject grade:
+msgstr
+
+msgid Date of review:
+msgstr
+
+msgid Text:
+msgstr
+
+msgid Review for teacher #{id}:
+msgstr
+
+msgid Do you want to delete review for teacher #{id}?
+msgstr
+
+msgid Teacher grade: {grade}
+msgstr
+
+msgid Subject with abbreviation {abbreviation} not found.
+msgstr
+
+msgid Grade must be between 1 and 5 inclusive.
+msgstr
+
+msgid Review must contain text.
+msgstr
+
+msgid Teacher with ID {id} not found.
+msgstr
+
+msgid There are no reviews for this subject.
+msgstr
+
+msgid You have no reviews.
+msgstr
+
+msgid Your reviews:
+msgstr
+
+msgid Your review of subject {abbreviation} added.
+msgstr
+
+msgid You have no review of subject {abbreviation}.
+msgstr
+
+msgid Deleting timed out.
+msgstr
+
+msgid Your review was removed.
+msgstr
+
+msgid Deleting aborted.
+msgstr
+
+msgid No review with ID {id}.
+msgstr
+
+msgid User's review was removed.
+msgstr
+
+msgid There are no reviews for this teacher.
+msgstr
+
+msgid Your review of teacher {name} added.
+msgstr
+
+msgid You have no review of teacher {name}.
+msgstr
+
+msgid Name must be atleast 3 characters long.
+msgstr
+
+msgid No subject with name '{name}' found.
+msgstr
+
+msgid Results for name '{name}':
+msgstr
+
+msgid Subject with abbreviation {abbreviation} already exists!
+msgstr
+
+msgid You can't add and remove same teacher (ID: {id}).
+msgstr
+
+msgid Subject successfuly edited.
+msgstr
+
+msgid Already teaching teachers: {teachers}
+msgstr
+
+msgid Can't remove teachers that don't teach this subject: {teachers}
+msgstr
+
+msgid Do you want to delete this subject:
+msgstr
+
+msgid Subject {abbreviation} deleted.
+msgstr
+
+msgid Abbreviation
+msgstr
+
+msgid Subject name
+msgstr
+
+msgid No teacher with name '{name}' found.
+msgstr
+
+msgid Teacher succesfuly edited.
+msgstr
+
+msgid Do you want to delete this teacher:
+msgstr
+
+msgid Teacher {name} deleted.
+msgstr
+
+msgid School ID
+msgstr
+
+msgid Teacher name
+msgstr
+
+msgid Degree must be B for Bachelor, M for Masters or D for Doctoral.
+msgstr
+
+msgid Program with abbreviation {abbreviation} and degree {degree} not found.
+msgstr
+
+msgid Program list
+msgstr
+
+msgid New degree must be B for Bachelor, M for Masters or D for Doctoral.
+msgstr
+
+msgid A program with the abbreviation '{abbreviation}' and '{degree}' already exists.
+msgstr
+
+msgid Program successfuly edited.
+msgstr
+
+msgid Do you want to delete this program:
+msgstr
+
+msgid Program {abbreviation} for degree {degree} deleted.
+msgstr
+
+msgid I'm expecting one JSON file.
+msgstr
+
+msgid You have to upload a JSON file.
+msgstr
+
+msgid Processing. Make a coffee, it may take a while.
+msgstr
+
+msgid Your JSON file contains errors.
+msgstr
+
+msgid Processed records: {count}
+msgstr
+
+msgid Teacher with ID {id} can't occure in add / remove argument more than once!
+msgstr
+
+msgid Obligation must be:
+msgstr
+
+msgid for
+msgstr
+
+msgid This combination of program, degree, subject, year and obligation already exists.
+msgstr
+
+msgid Subject and program succesfully linked.
+msgstr
+
+msgid This combination of program, degree, subject, year and obligation does not exists.
+msgstr
+
+msgid Subject and program succesfully unlinked.
+msgstr
+
+msgid Bachelor
+msgstr
+
+msgid Masters
+msgstr
+
+msgid Doctoral
+msgstr
+
+msgid Winter
+msgstr
+
+msgid Summer
+msgstr
+
+msgid Both
+msgstr
+
+msgid Optional
+msgstr
+
+msgid Compulsory - optional
+msgstr
+
+msgid Compulsory
+msgstr
+
+msgid Other
+msgstr
+
+msgid Recommended
+msgstr
+
+msgid Optional - specialized
+msgstr
+
+msgid Error parsing arguments:
+msgstr
+
+msgid Program {abbreviation}
+msgstr
+
+msgid Degree
+msgstr
+
+msgid Year: {year}
+msgstr
+
+msgid Institute
+msgstr
+
+msgid Semester
+msgstr
+
+msgid URL
+msgstr
+
+msgid Guarantor
+msgstr
+
+msgid Teachers
+msgstr Učitelia
+
+msgid **{program}** ({obligation}, year: {year})
+msgstr
+
+msgid Programs - {degree}
+msgstr
+
+msgid ID
+msgstr
+
+msgid Guaranted subjects
+msgstr
+
+msgid Teaches
+msgstr
+
 msgid Cannot find specified roles, aborting.
 msgstr
 
@@ -42,9 +345,6 @@ msgstr Pôvodný kanál
 
 msgid Teacher channel
 msgstr Kanál s učiteľmi
-
-msgid Teachers
-msgstr Učitelia
 
 msgid This channel is already assigned.
 msgstr Tento kanál už bol pridelený.
