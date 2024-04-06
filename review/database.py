@@ -150,13 +150,13 @@ class SubjectReview(database.base):
     relevance = relationship("SubjectRelevance", cascade="all, delete-orphan, delete")
 
     upvotes = column_property(
-        select([func.count(SubjectRelevance.voter_id)])
+        select(func.count(SubjectRelevance.voter_id))
         .where(SubjectRelevance.review == idx)
         .where(SubjectRelevance.vote.is_(True))
         .scalar_subquery()
     )
     downvotes = column_property(
-        select([func.count(SubjectRelevance.voter_id)])
+        select(func.count(SubjectRelevance.voter_id))
         .where(SubjectRelevance.review == idx)
         .where(SubjectRelevance.vote.is_(False))
         .scalar_subquery()
@@ -399,13 +399,13 @@ class TeacherReview(database.base):
     relevance = relationship("TeacherRelevance", cascade="all, delete-orphan, delete")
 
     upvotes = column_property(
-        select([func.count(TeacherRelevance.voter_id)])
+        select(func.count(TeacherRelevance.voter_id))
         .where(TeacherRelevance.review == idx)
         .where(TeacherRelevance.vote.is_(True))
         .scalar_subquery()
     )
     downvotes = column_property(
-        select([func.count(TeacherRelevance.voter_id)])
+        select(func.count(TeacherRelevance.voter_id))
         .where(TeacherRelevance.review == idx)
         .where(TeacherRelevance.vote.is_(False))
         .scalar_subquery()
