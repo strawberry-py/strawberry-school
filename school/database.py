@@ -1,17 +1,18 @@
 from __future__ import annotations
 
+from typing import Callable, Dict, List, Optional
+
 from sqlalchemy import (
     BigInteger,
     Column,
+    ForeignKey,
     Integer,
     String,
-    ForeignKey,
     Table,
     UniqueConstraint,
     not_,
 )
 from sqlalchemy.orm import relationship
-from typing import Callable, Dict, List, Optional
 
 from pie.database import database, session
 

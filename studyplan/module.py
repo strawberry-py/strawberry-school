@@ -1,12 +1,12 @@
 import enum
 import os
+import pathlib
 
 import discord
-import pathlib
 import pandas as pd
 from discord.ext import commands
-from pie import check, i18n
 
+from pie import check, i18n
 
 _ = i18n.Translator("modules/school").translate
 

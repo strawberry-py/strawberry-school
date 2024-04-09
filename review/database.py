@@ -1,29 +1,26 @@
 from __future__ import annotations
 
 from datetime import date, timedelta
+from typing import List, Optional, Union
 
 import discord
-
 from discord.ext import commands
-
 from sqlalchemy import (
     BigInteger,
-    Column,
-    Integer,
-    String,
     Boolean,
+    Column,
     Date,
     ForeignKey,
+    Integer,
+    String,
     UniqueConstraint,
-    select,
-    func,
     exists,
+    func,
+    select,
 )
-
-from sqlalchemy.orm import relationship, column_property
+from sqlalchemy.orm import column_property, relationship
 
 from pie.database import database, session
-from typing import List, Optional, Union
 
 from ..school.database import Subject, Teacher
 
