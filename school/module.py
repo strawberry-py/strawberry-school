@@ -3,16 +3,14 @@ import json
 import re
 import shlex
 import tempfile
-
-from typing import Callable, Optional, Iterable, List
+from typing import Callable, Iterable, List, Optional
 
 import discord
-
 from discord.ext import commands
 
-from pie import i18n, logger, utils, check
+from pie import check, i18n, logger, utils
 
-from .database import Teacher, Subject, Program, SubjectProgram
+from .database import Program, Subject, SubjectProgram, Teacher
 
 _ = i18n.Translator("modules/school").translate
 guild_log = logger.Guild.logger()

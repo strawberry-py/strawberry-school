@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import List, Optional
 
-from sqlalchemy import BigInteger, Column, ForeignKey, or_, and_, PrimaryKeyConstraint
+from sqlalchemy import BigInteger, Column, ForeignKey, PrimaryKeyConstraint, and_, or_
 from sqlalchemy.orm import relationship
 
 from pie.database import database, session

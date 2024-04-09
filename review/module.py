@@ -10,14 +10,13 @@ import discord
 from discord.ext import commands
 
 import pie.acl
-from pie import i18n, logger, utils, check
+from pie import check, i18n, logger, utils
 from pie.acl.database import ACDefault, ACLevel
 from pie.utils.objects import ConfirmView, ScrollableVotingEmbed, VotableEmbed
 
-
-from .database import SubjectReview, TeacherReview
 from ..school.database import Subject, Teacher
 from ..school.module import SchoolExtend
+from .database import SubjectReview, TeacherReview
 
 _ = i18n.Translator("modules/school").translate
 
