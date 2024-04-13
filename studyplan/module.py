@@ -2,8 +2,9 @@ import enum
 import os
 import pathlib
 
-import discord
 import pandas as pd
+
+import discord
 from discord.ext import commands
 
 from pie import check, i18n

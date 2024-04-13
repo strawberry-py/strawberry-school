@@ -3,8 +3,6 @@ from __future__ import annotations
 from datetime import date, timedelta
 from typing import List, Optional, Union
 
-import discord
-from discord.ext import commands
 from sqlalchemy import (
     BigInteger,
     Boolean,
@@ -19,6 +17,9 @@ from sqlalchemy import (
     select,
 )
 from sqlalchemy.orm import column_property, relationship
+
+import discord
+from discord.ext import commands
 
 from pie.database import database, session
 
