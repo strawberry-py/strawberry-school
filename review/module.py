@@ -35,7 +35,7 @@ class Review(commands.Cog):
     # School extension functions
 
     @staticmethod
-    def _extend_subject(ctx, embed: discord.Embed, subject: Subject):
+    def _extend_subject(ctx: commands.Context, embed: discord.Embed, subject: Subject):
         """Extends subject information from School module"""
         grade = SubjectReview.avg_grade(subject)
         grade = "{:.1f}".format(grade) if grade else "-"
@@ -46,7 +46,7 @@ class Review(commands.Cog):
         )
 
     @staticmethod
-    def _extend_teacher(ctx, embed: discord.Embed, teacher: Teacher):
+    def _extend_teacher(ctx: commands.Context, embed: discord.Embed, teacher: Teacher):
         """Extends subject information from School module"""
         grade = TeacherReview.avg_grade(teacher)
         grade = "{:.1f}".format(grade) if grade else "-"
@@ -60,7 +60,7 @@ class Review(commands.Cog):
 
     def _get_subject_review_embed(
         self,
-        ctx,
+        ctx: commands.Context,
         subject: Subject,
         review: SubjectReview,
         sudo: bool = False,
@@ -137,7 +137,7 @@ class Review(commands.Cog):
 
     def _get_teacher_review_embed(
         self,
-        ctx,
+        ctx: commands.Context,
         teacher: Teacher,
         review: TeacherReview,
         sudo: bool = False,
@@ -213,7 +213,12 @@ class Review(commands.Cog):
             yield li[i : i + n]
 
     async def _add_subject_review(
-        self, ctx, abbreviation: str, grade: int, text: str, anonymous: bool
+        self,
+        ctx: commands.Context,
+        abbreviation: str,
+        grade: int,
+        text: str,
+        anonymous: bool,
     ) -> Optional[SubjectReview]:
         """Add and return review.
 
@@ -249,7 +254,12 @@ class Review(commands.Cog):
         return review
 
     async def _add_teacher_review(
-        self, ctx, teacher_id: int, grade: int, text: str, anonymous: bool
+        self,
+        ctx: commands.Context,
+        teacher_id: int,
+        grade: int,
+        text: str,
+        anonymous: bool,
     ) -> Optional[TeacherReview]:
         """Add and return review.
 
@@ -288,7 +298,7 @@ class Review(commands.Cog):
     @commands.cooldown(rate=5, per=60, type=commands.BucketType.user)
     @check.acl2(check.ACLevel.MEMBER)
     @commands.group(name="review")
-    async def review_(self, ctx):
+    async def review_(self, ctx: commands.Context):
         """Manage school reviews"""
         await utils.discord.send_help(ctx)
 
@@ -296,13 +306,13 @@ class Review(commands.Cog):
 
     @check.acl2(check.ACLevel.MEMBER)
     @review_.group(name="subject")
-    async def review_subject_(self, ctx):
+    async def review_subject_(self, ctx: commands.Context):
         """Manage subject reviews"""
         await utils.discord.send_help(ctx)
 
     @check.acl2(check.ACLevel.MEMBER)
     @review_subject_.command(name="list", aliases=["show", "see"])
-    async def review_subject_list(self, ctx, abbreviation: str):
+    async def review_subject_list(self, ctx: commands.Context, abbreviation: str):
         """Show subject's reviews
 
         Args:
@@ -330,7 +340,7 @@ class Review(commands.Cog):
 
     @check.acl2(check.ACLevel.MEMBER)
     @review_subject_.command(name="mine", aliases=["my-list", "mylist"])
-    async def review_subject_mine(self, ctx):
+    async def review_subject_mine(self, ctx: commands.Context):
         """Get list of all your reviewed subjects"""
         reviews = SubjectReview.get_all_by_author(ctx)
 
@@ -358,7 +368,7 @@ class Review(commands.Cog):
     @check.acl2(check.ACLevel.MEMBER)
     @review_subject_.command(name="add", aliases=["update"])
     async def review_subject_add(
-        self, ctx, abbreviation: str, grade: int, *, text: str
+        self, ctx: commands.Context, abbreviation: str, grade: int, *, text: str
     ):
         """Add or edit subject review. Resets relevance if review is older than 1 month.
 
@@ -388,7 +398,7 @@ class Review(commands.Cog):
     @check.acl2(check.ACLevel.MEMBER)
     @review_subject_.command(name="add-anonymous", aliases=["anonymous", "anon"])
     async def review_subject_add_anonymous(
-        self, ctx, abbreviation: str, grade: int, *, text: str
+        self, ctx: commands.Context, abbreviation: str, grade: int, *, text: str
     ):
         """Add or edit anonymous subject review. Resets relevance if review is older than 1 month.
 
@@ -417,7 +427,7 @@ class Review(commands.Cog):
 
     @check.acl2(check.ACLevel.MEMBER)
     @review_subject_.command(name="remove")
-    async def review_subject_remove(self, ctx, abbreviation: str):
+    async def review_subject_remove(self, ctx: commands.Context, abbreviation: str):
         """Remove your subject review
 
         Args:
@@ -466,13 +476,13 @@ class Review(commands.Cog):
 
     @check.acl2(check.ACLevel.SUBMOD)
     @review_subject_.group(name="sudo")
-    async def review_subject_sudo_(self, ctx):
+    async def review_subject_sudo_(self, ctx: commands.Context):
         """Manage other user's subject reviews"""
         await utils.discord.send_help(ctx)
 
     @check.acl2(check.ACLevel.SUBMOD)
     @review_subject_sudo_.command(name="remove")
-    async def review_subject_sudo_remove(self, ctx, idx: int):
+    async def review_subject_sudo_remove(self, ctx: commands.Context, idx: int):
         """Remove someone's subject review
 
         Args:
@@ -513,13 +523,13 @@ class Review(commands.Cog):
 
     @check.acl2(check.ACLevel.MEMBER)
     @review_.group(name="teacher")
-    async def review_teacher_(self, ctx):
+    async def review_teacher_(self, ctx: commands.Context):
         """Manage teacher reviews"""
         await utils.discord.send_help(ctx)
 
     @check.acl2(check.ACLevel.MEMBER)
     @review_teacher_.command(name="list", aliases=["show", "see"])
-    async def review_teacher_list(self, ctx, teacher_id: int):
+    async def review_teacher_list(self, ctx: commands.Context, teacher_id: int):
         """Show teacher's reviews
 
         Args:
@@ -547,7 +557,7 @@ class Review(commands.Cog):
 
     @check.acl2(check.ACLevel.MEMBER)
     @review_teacher_.command(name="mine", aliases=["my-list", "mylist"])
-    async def review_teacher_mine(self, ctx):
+    async def review_teacher_mine(self, ctx: commands.Context):
         """Get list of all your reviewed teachers"""
         reviews = TeacherReview.get_all_by_author(ctx)
 
@@ -579,7 +589,9 @@ class Review(commands.Cog):
 
     @check.acl2(check.ACLevel.MEMBER)
     @review_teacher_.command(name="add", aliases=["update"])
-    async def review_teacher_add(self, ctx, teacher_id: int, grade: int, *, text: str):
+    async def review_teacher_add(
+        self, ctx: commands.Context, teacher_id: int, grade: int, *, text: str
+    ):
         """Add or edit teacher review. Resets relevance if review is older than 1 month.
 
         Args:
@@ -607,7 +619,7 @@ class Review(commands.Cog):
     @check.acl2(check.ACLevel.MEMBER)
     @review_teacher_.command(name="add-anonymous", aliases=["anonymous", "anon"])
     async def review_teacher_add_anonymous(
-        self, ctx, teacher_id: int, grade: int, *, text: str
+        self, ctx: commands.Context, teacher_id: int, grade: int, *, text: str
     ):
         """Add or edit anonymous teacher review. Resets relevance if review is older than 1 month.
 
@@ -635,7 +647,7 @@ class Review(commands.Cog):
 
     @check.acl2(check.ACLevel.MEMBER)
     @review_teacher_.command(name="remove")
-    async def review_teacher_remove(self, ctx, teacher_id: int):
+    async def review_teacher_remove(self, ctx: commands.Context, teacher_id: int):
         """Remove your teacher review
 
         Args:
@@ -682,13 +694,13 @@ class Review(commands.Cog):
 
     @check.acl2(check.ACLevel.SUBMOD)
     @review_teacher_.group(name="sudo")
-    async def review_teacher_sudo_(self, ctx):
+    async def review_teacher_sudo_(self, ctx: commands.Context):
         """Manage other user's reviews"""
         await utils.discord.send_help(ctx)
 
     @check.acl2(check.ACLevel.SUBMOD)
     @review_teacher_sudo_.command(name="remove")
-    async def review_teacher_sudo_remove(self, ctx, idx: int):
+    async def review_teacher_sudo_remove(self, ctx: commands.Context, idx: int):
         """Remove someone's teacher review
 
         Args:
@@ -726,5 +738,5 @@ class Review(commands.Cog):
             await ctx.send(_(ctx, "Deleting aborted."))
 
 
-async def setup(bot) -> None:
+async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(Review(bot))
