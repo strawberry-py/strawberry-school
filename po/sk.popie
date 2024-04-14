@@ -1,18 +1,3 @@
-msgid Your positive vote has been counted.
-msgstr
-
-msgid Your vote has been deleted.
-msgstr
-
-msgid Your negative vote has been counted.
-msgstr
-
-msgid Can't vote on own review!
-msgstr
-
-msgid You don't have permissions to vote!
-msgstr
-
 msgid Average grade:
 msgstr
 
@@ -107,6 +92,21 @@ msgid Your review of teacher {name} added.
 msgstr
 
 msgid You have no review of teacher {name}.
+msgstr
+
+msgid Your positive vote has been counted.
+msgstr
+
+msgid Your vote has been deleted.
+msgstr
+
+msgid Your negative vote has been counted.
+msgstr
+
+msgid Can't vote on own review!
+msgstr
+
+msgid You don't have permissions to vote!
 msgstr
 
 msgid Name must be atleast 3 characters long.

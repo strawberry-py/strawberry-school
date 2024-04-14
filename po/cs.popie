@@ -1,18 +1,3 @@
-msgid Your positive vote has been counted.
-msgstr Tvůj pozitivní hlas byl započítán.
-
-msgid Your vote has been deleted.
-msgstr Tvůj hlas byl smazán.
-
-msgid Your negative vote has been counted.
-msgstr Tvůj negativní hlas byl započítán.
-
-msgid Can't vote on own review!
-msgstr Nemůžeš hlasovat o vlastní recenzi!
-
-msgid You don't have permissions to vote!
-msgstr Nemáš práva na hlasování!
-
 msgid Average grade:
 msgstr Průměrná známka:
 
@@ -108,6 +93,21 @@ msgstr Tvoje recenze učitele {name} byla přidána.
 
 msgid You have no review of teacher {name}.
 msgstr Nemáš žádné review učitele {name}.
+
+msgid Your positive vote has been counted.
+msgstr Tvůj pozitivní hlas byl započítán.
+
+msgid Your vote has been deleted.
+msgstr Tvůj hlas byl smazán.
+
+msgid Your negative vote has been counted.
+msgstr Tvůj negativní hlas byl započítán.
+
+msgid Can't vote on own review!
+msgstr Nemůžeš hlasovat o vlastní recenzi!
+
+msgid You don't have permissions to vote!
+msgstr Nemáš práva na hlasování!
 
 msgid Name must be atleast 3 characters long.
 msgstr Jméno musí mít alespoň 3 znaky.
