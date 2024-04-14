@@ -29,7 +29,7 @@ class ReviewEmbed(VotableEmbed):
 
     def __init__(
         self,
-        review,
+        review: SubjectReview,
         bot: commands.Bot,
         author: Optional[discord.Member] = None,
         footer: Optional[str] = None,
@@ -37,8 +37,8 @@ class ReviewEmbed(VotableEmbed):
         **kwargs,
     ):
         super(ReviewEmbed, self).__init__(*args, **kwargs)
-        self.review = review
-        self.bot = bot
+        self.review: SubjectReview = review
+        self.bot: commands.Bot = bot
 
         base_footer = "📩 "
         if author is not None:
@@ -51,62 +51,46 @@ class ReviewEmbed(VotableEmbed):
         )
         self.timestamp = datetime.datetime.now(tz=datetime.timezone.utc)
 
-    async def vote_up(self, interaction: discord.Interaction):
+    async def vote_up(self, itx: discord.Interaction):
         """Implementation of vote_up function from VotableEmbed"""
-        utx = i18n.TranslationContext(interaction.guild.id, interaction.user.id)
-
-        if await self._is_author(utx, interaction) or not await self._has_permission(
-            utx, interaction
-        ):
+        if await self._is_author(itx) or not await self._has_permission(itx):
             return
 
-        self.review.vote(interaction.user, True)
-        await interaction.response.send_message(
-            _(utx, "Your positive vote has been counted."), ephemeral=True
+        self.review.vote(itx.user, True)
+        await itx.response.send_message(
+            _(itx, "Your positive vote has been counted."), ephemeral=True
         )
 
-    async def vote_neutral(self, interaction: discord.Interaction):
+    async def vote_neutral(self, itx: discord.Interaction):
         """Implementation of vote_neutral function from VotableEmbed"""
-        utx = i18n.TranslationContext(interaction.guild.id, interaction.user.id)
-
-        if await self._is_author(utx, interaction) or not await self._has_permission(
-            utx, interaction
-        ):
+        if await self._is_author(itx) or not await self._has_permission(itx):
             return
 
-        self.review.vote(interaction.user, None)
-        await interaction.response.send_message(
-            _(utx, "Your vote has been deleted."), ephemeral=True
+        self.review.vote(itx.user, None)
+        await itx.response.send_message(
+            _(itx, "Your vote has been deleted."), ephemeral=True
         )
 
-    async def vote_down(self, interaction: discord.Interaction):
+    async def vote_down(self, itx: discord.Interaction):
         """Implementation of vote_down function from VotableEmbed"""
-        utx = i18n.TranslationContext(interaction.guild.id, interaction.user.id)
-
-        if await self._is_author(utx, interaction) or not await self._has_permission(
-            utx, interaction
-        ):
+        if await self._is_author(itx) or not await self._has_permission(itx):
             return
 
-        self.review.vote(interaction.user, False)
-        await interaction.response.send_message(
-            _(utx, "Your negative vote has been counted."), ephemeral=True
+        self.review.vote(itx.user, False)
+        await itx.response.send_message(
+            _(itx, "Your negative vote has been counted."), ephemeral=True
         )
 
-    async def _is_author(
-        self, utx: i18n.TranslationContext, interaction: discord.Interaction
-    ) -> bool:
+    async def _is_author(self, itx: discord.Interaction) -> bool:
         """Checks if interacting user is review author"""
-        if self.review.author_id == interaction.user.id:
-            await interaction.response.send_message(
-                _(utx, "Can't vote on own review!"), ephemeral=True
+        if self.review.author_id == itx.user.id:
+            await itx.response.send_message(
+                _(itx, "Can't vote on own review!"), ephemeral=True
             )
             return True
         return False
 
-    async def _has_permission(
-        self, utx: i18n.TranslationContext, interaction: discord.Interaction
-    ) -> bool:
+    async def _has_permission(self, itx: discord.Interaction) -> bool:
         """Checks if user has ACL for review list to vote"""
         perm = (
             "review subject list"
@@ -114,9 +98,9 @@ class ReviewEmbed(VotableEmbed):
             else "review teacher list"
         )
 
-        res = pie.acl.can_invoke_command(interaction, perm)
+        res = pie.acl.can_invoke_command(itx, perm)
         if not res:
-            await interaction.response.send_message(
-                _(utx, "You don't have permissions to vote!"), ephemeral=True
+            await itx.response.send_message(
+                _(itx, "You don't have permissions to vote!"), ephemeral=True
             )
         return res
