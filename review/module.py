@@ -1,17 +1,15 @@
 from __future__ import annotations
 
 import datetime
-import inspect
-import re
 import textwrap
-from typing import Callable, List, Optional
+from typing import List, Optional
 
 import discord
 from discord.ext import commands
 
 import pie.acl
 from pie import check, i18n, logger, utils
-from pie.acl.database import ACDefault, ACLevel
+import pie.exceptions
 from pie.utils.objects import ConfirmView, ScrollableVotingEmbed, VotableEmbed
 
 from ..school.database import Subject, Teacher
@@ -121,71 +119,12 @@ class ReviewEmbed(VotableEmbed):
             else "review teacher list"
         )
 
-        atx = ACLContext(
-            self.bot, interaction.user, interaction.guild, interaction.channel, perm
-        )
-        res = self.can_invoke_command(atx, perm)
+        res = pie.acl.can_invoke_command(interaction, perm)
         if not res:
             await interaction.response.send_message(
                 _(utx, "You don't have permissions to vote!"), ephemeral=True
             )
         return res
-
-    def get_hardcoded_ACLevel(self, command_function: Callable) -> Optional[ACLevel]:
-        """Return the ACLevel name of function's acl2 decorator."""
-        source = inspect.getsource(command_function)
-        match = re.search(r"acl2\(check\.ACLevel\.(.*)\)", source)
-        if not match:
-            return None
-        level = match.group(1)
-        return ACLevel[level]
-
-    def get_true_ACLevel(self, guild_id: int, command: str) -> Optional[ACLevel]:
-        default_overwrite = ACDefault.get(guild_id, command)
-        if default_overwrite:
-            level = default_overwrite.level
-        else:
-            command_obj = self.bot.get_command(command)
-            level = self.get_hardcoded_ACLevel(command_obj.callback)
-        return level
-
-    def can_invoke_command(self, ctx: commands.Context, command: str) -> bool:
-        """Check if given command is invokable by the user."""
-        command_level = self.get_true_ACLevel(ctx.guild.id, command)
-        if command_level is None:
-            return False
-
-        try:
-            pie.acl.acl2_function(ctx, command_level, for_command=command)
-            return True
-        except pie.exceptions.ACLFailure:
-            return False
-
-
-class Object(object):
-    """Empty object, used in ACLContext"""
-
-    pass
-
-
-class ACLContext:
-    """Fake class used instead of commands.Context to check
-    for permissions when voting."""
-
-    def __init__(
-        self,
-        bot: commands.Bot,
-        author: discord.Member,
-        guild: discord.Guild,
-        channel: discord.GuildChannel,
-        str_name: str,
-    ):
-        self.bot = bot
-        self.author = author
-        self.guild = guild
-        self.channel = channel
-        self.command = Object()
-        self.command.qualified_name = str_name
 
 
 class Review(commands.Cog):
