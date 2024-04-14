@@ -1,191 +1,22 @@
 from __future__ import annotations
 
-import datetime
-import inspect
-import re
 import textwrap
-from typing import Callable, List, Optional
+from typing import Iterator, List, Optional
 
 import discord
 from discord.ext import commands
 
-import pie.acl
 from pie import check, i18n, logger, utils
-from pie.acl.database import ACDefault, ACLevel
-from pie.utils.objects import ConfirmView, ScrollableVotingEmbed, VotableEmbed
+from pie.utils.objects import ConfirmView, ScrollableVotingEmbed
 
 from ..school.database import Subject, Teacher
 from ..school.module import SchoolExtend
 from .database import SubjectReview, TeacherReview
+from .objects import ReviewEmbed
 
 _ = i18n.Translator("modules/school").translate
 
 guild_log = logger.Guild.logger()
-
-
-class ReviewEmbed(VotableEmbed):
-    """Embed implementing VotableEmbed used in ScrollableVotingEmbed
-
-    Args:
-        review: Review database object, must implement `vote(discord.Member, discord.Interaction)`
-                and have attribute author_id
-        footer: Optional footer text
-        *args: Same arguments as used in discord.Embed
-        **kwargs: Same keyword arguments as used in discord.Embed
-    """
-
-    def __init__(
-        self,
-        review,
-        bot: commands.Bot,
-        author: Optional[discord.Member] = None,
-        footer: Optional[str] = None,
-        *args,
-        **kwargs,
-    ):
-        super(ReviewEmbed, self).__init__(*args, **kwargs)
-        self.review = review
-        self.bot = bot
-
-        base_footer = "📩 "
-        if author is not None:
-            base_footer += f" {author.display_name}"
-        if footer is not None:
-            base_footer += " | " + footer
-        self.set_footer(
-            icon_url=getattr(author, "avatar_url", None),
-            text=base_footer,
-        )
-        self.timestamp = datetime.datetime.now(tz=datetime.timezone.utc)
-
-    async def vote_up(self, interaction: discord.Interaction):
-        """Implementation of vote_up function from VotableEmbed"""
-        utx = i18n.TranslationContext(interaction.guild.id, interaction.user.id)
-
-        if await self._is_author(utx, interaction) or not await self._has_permission(
-            utx, interaction
-        ):
-            return
-
-        self.review.vote(interaction.user, True)
-        await interaction.response.send_message(
-            _(utx, "Your positive vote has been counted."), ephemeral=True
-        )
-
-    async def vote_neutral(self, interaction: discord.Interaction):
-        """Implementation of vote_neutral function from VotableEmbed"""
-        utx = i18n.TranslationContext(interaction.guild.id, interaction.user.id)
-
-        if await self._is_author(utx, interaction) or not await self._has_permission(
-            utx, interaction
-        ):
-            return
-
-        self.review.vote(interaction.user, None)
-        await interaction.response.send_message(
-            _(utx, "Your vote has been deleted."), ephemeral=True
-        )
-
-    async def vote_down(self, interaction: discord.Interaction):
-        """Implementation of vote_down function from VotableEmbed"""
-        utx = i18n.TranslationContext(interaction.guild.id, interaction.user.id)
-
-        if await self._is_author(utx, interaction) or not await self._has_permission(
-            utx, interaction
-        ):
-            return
-
-        self.review.vote(interaction.user, False)
-        await interaction.response.send_message(
-            _(utx, "Your negative vote has been counted."), ephemeral=True
-        )
-
-    async def _is_author(
-        self, utx: i18n.TranslationContext, interaction: discord.Interaction
-    ) -> bool:
-        """Checks if interacting user is review author"""
-        if self.review.author_id == interaction.user.id:
-            await interaction.response.send_message(
-                _(utx, "Can't vote on own review!"), ephemeral=True
-            )
-            return True
-        return False
-
-    async def _has_permission(
-        self, utx: i18n.TranslationContext, interaction: discord.Interaction
-    ) -> bool:
-        """Checks if user has ACL for review list to vote"""
-        perm = (
-            "review subject list"
-            if isinstance(self.review, SubjectReview)
-            else "review teacher list"
-        )
-
-        atx = ACLContext(
-            self.bot, interaction.user, interaction.guild, interaction.channel, perm
-        )
-        res = self.can_invoke_command(atx, perm)
-        if not res:
-            await interaction.response.send_message(
-                _(utx, "You don't have permissions to vote!"), ephemeral=True
-            )
-        return res
-
-    def get_hardcoded_ACLevel(self, command_function: Callable) -> Optional[ACLevel]:
-        """Return the ACLevel name of function's acl2 decorator."""
-        source = inspect.getsource(command_function)
-        match = re.search(r"acl2\(check\.ACLevel\.(.*)\)", source)
-        if not match:
-            return None
-        level = match.group(1)
-        return ACLevel[level]
-
-    def get_true_ACLevel(self, guild_id: int, command: str) -> Optional[ACLevel]:
-        default_overwrite = ACDefault.get(guild_id, command)
-        if default_overwrite:
-            level = default_overwrite.level
-        else:
-            command_obj = self.bot.get_command(command)
-            level = self.get_hardcoded_ACLevel(command_obj.callback)
-        return level
-
-    def can_invoke_command(self, ctx: commands.Context, command: str) -> bool:
-        """Check if given command is invokable by the user."""
-        command_level = self.get_true_ACLevel(ctx.guild.id, command)
-        if command_level is None:
-            return False
-
-        try:
-            pie.acl.acl2_function(ctx, command_level, for_command=command)
-            return True
-        except pie.exceptions.ACLFailure:
-            return False
-
-
-class Object(object):
-    """Empty object, used in ACLContext"""
-
-    pass
-
-
-class ACLContext:
-    """Fake class used instead of commands.Context to check
-    for permissions when voting."""
-
-    def __init__(
-        self,
-        bot: commands.Bot,
-        author: discord.Member,
-        guild: discord.Guild,
-        channel: discord.GuildChannel,
-        str_name: str,
-    ):
-        self.bot = bot
-        self.author = author
-        self.guild = guild
-        self.channel = channel
-        self.command = Object()
-        self.command.qualified_name = str_name
 
 
 class Review(commands.Cog):
@@ -204,7 +35,7 @@ class Review(commands.Cog):
     # School extension functions
 
     @staticmethod
-    def _extend_subject(ctx, embed: discord.Embed, subject: Subject):
+    def _extend_subject(ctx: commands.Context, embed: discord.Embed, subject: Subject):
         """Extends subject information from School module"""
         grade = SubjectReview.avg_grade(subject)
         grade = "{:.1f}".format(grade) if grade else "-"
@@ -215,7 +46,7 @@ class Review(commands.Cog):
         )
 
     @staticmethod
-    def _extend_teacher(ctx, embed: discord.Embed, teacher: Teacher):
+    def _extend_teacher(ctx: commands.Context, embed: discord.Embed, teacher: Teacher):
         """Extends subject information from School module"""
         grade = TeacherReview.avg_grade(teacher)
         grade = "{:.1f}".format(grade) if grade else "-"
@@ -229,7 +60,7 @@ class Review(commands.Cog):
 
     def _get_subject_review_embed(
         self,
-        ctx,
+        ctx: commands.Context,
         subject: Subject,
         review: SubjectReview,
         sudo: bool = False,
@@ -306,7 +137,7 @@ class Review(commands.Cog):
 
     def _get_teacher_review_embed(
         self,
-        ctx,
+        ctx: commands.Context,
         teacher: Teacher,
         review: TeacherReview,
         sudo: bool = False,
@@ -371,7 +202,7 @@ class Review(commands.Cog):
         return embed
 
     @staticmethod
-    def _split_list(li, n) -> List[List]:
+    def _split_list(li, n) -> Iterator[List[List]]:
         """Split list into lists of N items
 
         Args:
@@ -382,7 +213,12 @@ class Review(commands.Cog):
             yield li[i : i + n]
 
     async def _add_subject_review(
-        self, ctx, abbreviation: str, grade: int, text: str, anonymous: bool
+        self,
+        ctx: commands.Context,
+        abbreviation: str,
+        grade: int,
+        text: str,
+        anonymous: bool,
     ) -> Optional[SubjectReview]:
         """Add and return review.
 
@@ -418,7 +254,12 @@ class Review(commands.Cog):
         return review
 
     async def _add_teacher_review(
-        self, ctx, teacher_id: int, grade: int, text: str, anonymous: bool
+        self,
+        ctx: commands.Context,
+        teacher_id: int,
+        grade: int,
+        text: str,
+        anonymous: bool,
     ) -> Optional[TeacherReview]:
         """Add and return review.
 
@@ -457,7 +298,7 @@ class Review(commands.Cog):
     @commands.cooldown(rate=5, per=60, type=commands.BucketType.user)
     @check.acl2(check.ACLevel.MEMBER)
     @commands.group(name="review")
-    async def review_(self, ctx):
+    async def review_(self, ctx: commands.Context):
         """Manage school reviews"""
         await utils.discord.send_help(ctx)
 
@@ -465,13 +306,13 @@ class Review(commands.Cog):
 
     @check.acl2(check.ACLevel.MEMBER)
     @review_.group(name="subject")
-    async def review_subject_(self, ctx):
+    async def review_subject_(self, ctx: commands.Context):
         """Manage subject reviews"""
         await utils.discord.send_help(ctx)
 
     @check.acl2(check.ACLevel.MEMBER)
     @review_subject_.command(name="list", aliases=["show", "see"])
-    async def review_subject_list(self, ctx, abbreviation: str):
+    async def review_subject_list(self, ctx: commands.Context, abbreviation: str):
         """Show subject's reviews
 
         Args:
@@ -499,7 +340,7 @@ class Review(commands.Cog):
 
     @check.acl2(check.ACLevel.MEMBER)
     @review_subject_.command(name="mine", aliases=["my-list", "mylist"])
-    async def review_subject_mine(self, ctx):
+    async def review_subject_mine(self, ctx: commands.Context):
         """Get list of all your reviewed subjects"""
         reviews = SubjectReview.get_all_by_author(ctx)
 
@@ -527,7 +368,7 @@ class Review(commands.Cog):
     @check.acl2(check.ACLevel.MEMBER)
     @review_subject_.command(name="add", aliases=["update"])
     async def review_subject_add(
-        self, ctx, abbreviation: str, grade: int, *, text: str
+        self, ctx: commands.Context, abbreviation: str, grade: int, *, text: str
     ):
         """Add or edit subject review. Resets relevance if review is older than 1 month.
 
@@ -557,7 +398,7 @@ class Review(commands.Cog):
     @check.acl2(check.ACLevel.MEMBER)
     @review_subject_.command(name="add-anonymous", aliases=["anonymous", "anon"])
     async def review_subject_add_anonymous(
-        self, ctx, abbreviation: str, grade: int, *, text: str
+        self, ctx: commands.Context, abbreviation: str, grade: int, *, text: str
     ):
         """Add or edit anonymous subject review. Resets relevance if review is older than 1 month.
 
@@ -586,7 +427,7 @@ class Review(commands.Cog):
 
     @check.acl2(check.ACLevel.MEMBER)
     @review_subject_.command(name="remove")
-    async def review_subject_remove(self, ctx, abbreviation: str):
+    async def review_subject_remove(self, ctx: commands.Context, abbreviation: str):
         """Remove your subject review
 
         Args:
@@ -635,13 +476,13 @@ class Review(commands.Cog):
 
     @check.acl2(check.ACLevel.SUBMOD)
     @review_subject_.group(name="sudo")
-    async def review_subject_sudo_(self, ctx):
+    async def review_subject_sudo_(self, ctx: commands.Context):
         """Manage other user's subject reviews"""
         await utils.discord.send_help(ctx)
 
     @check.acl2(check.ACLevel.SUBMOD)
     @review_subject_sudo_.command(name="remove")
-    async def review_subject_sudo_remove(self, ctx, idx: int):
+    async def review_subject_sudo_remove(self, ctx: commands.Context, idx: int):
         """Remove someone's subject review
 
         Args:
@@ -682,13 +523,13 @@ class Review(commands.Cog):
 
     @check.acl2(check.ACLevel.MEMBER)
     @review_.group(name="teacher")
-    async def review_teacher_(self, ctx):
+    async def review_teacher_(self, ctx: commands.Context):
         """Manage teacher reviews"""
         await utils.discord.send_help(ctx)
 
     @check.acl2(check.ACLevel.MEMBER)
     @review_teacher_.command(name="list", aliases=["show", "see"])
-    async def review_teacher_list(self, ctx, teacher_id: int):
+    async def review_teacher_list(self, ctx: commands.Context, teacher_id: int):
         """Show teacher's reviews
 
         Args:
@@ -716,7 +557,7 @@ class Review(commands.Cog):
 
     @check.acl2(check.ACLevel.MEMBER)
     @review_teacher_.command(name="mine", aliases=["my-list", "mylist"])
-    async def review_teacher_mine(self, ctx):
+    async def review_teacher_mine(self, ctx: commands.Context):
         """Get list of all your reviewed teachers"""
         reviews = TeacherReview.get_all_by_author(ctx)
 
@@ -748,7 +589,9 @@ class Review(commands.Cog):
 
     @check.acl2(check.ACLevel.MEMBER)
     @review_teacher_.command(name="add", aliases=["update"])
-    async def review_teacher_add(self, ctx, teacher_id: int, grade: int, *, text: str):
+    async def review_teacher_add(
+        self, ctx: commands.Context, teacher_id: int, grade: int, *, text: str
+    ):
         """Add or edit teacher review. Resets relevance if review is older than 1 month.
 
         Args:
@@ -776,7 +619,7 @@ class Review(commands.Cog):
     @check.acl2(check.ACLevel.MEMBER)
     @review_teacher_.command(name="add-anonymous", aliases=["anonymous", "anon"])
     async def review_teacher_add_anonymous(
-        self, ctx, teacher_id: int, grade: int, *, text: str
+        self, ctx: commands.Context, teacher_id: int, grade: int, *, text: str
     ):
         """Add or edit anonymous teacher review. Resets relevance if review is older than 1 month.
 
@@ -804,7 +647,7 @@ class Review(commands.Cog):
 
     @check.acl2(check.ACLevel.MEMBER)
     @review_teacher_.command(name="remove")
-    async def review_teacher_remove(self, ctx, teacher_id: int):
+    async def review_teacher_remove(self, ctx: commands.Context, teacher_id: int):
         """Remove your teacher review
 
         Args:
@@ -851,13 +694,13 @@ class Review(commands.Cog):
 
     @check.acl2(check.ACLevel.SUBMOD)
     @review_teacher_.group(name="sudo")
-    async def review_teacher_sudo_(self, ctx):
+    async def review_teacher_sudo_(self, ctx: commands.Context):
         """Manage other user's reviews"""
         await utils.discord.send_help(ctx)
 
     @check.acl2(check.ACLevel.SUBMOD)
     @review_teacher_sudo_.command(name="remove")
-    async def review_teacher_sudo_remove(self, ctx, idx: int):
+    async def review_teacher_sudo_remove(self, ctx: commands.Context, idx: int):
         """Remove someone's teacher review
 
         Args:
@@ -895,5 +738,5 @@ class Review(commands.Cog):
             await ctx.send(_(ctx, "Deleting aborted."))
 
 
-async def setup(bot) -> None:
+async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(Review(bot))
