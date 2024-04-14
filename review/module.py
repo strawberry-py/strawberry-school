@@ -310,7 +310,7 @@ class Review(commands.Cog):
         return embed
 
     @staticmethod
-    def _split_list(li, n) -> List[List]:
+    def _split_list(li, n) -> Iterator[List[List]]:
         """Split list into lists of N items
 
         Args:
