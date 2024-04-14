@@ -98,7 +98,7 @@ class ReviewEmbed(VotableEmbed):
             else "review teacher list"
         )
 
-        res = pie.acl.can_invoke_command(itx, perm)
+        res = pie.acl.can_invoke_command(self.bot, itx, perm)
         if not res:
             await itx.response.send_message(
                 _(itx, "You don't have permissions to vote!"), ephemeral=True
