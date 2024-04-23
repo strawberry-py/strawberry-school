@@ -930,6 +930,10 @@ class School(commands.Cog):
             count = await self._import_school_data(ctx, json_data)
             data_file.close()
 
+        await guild_log.info(
+            ctx.member, ctx.channel, "Processed and imported {count} school records."
+        )
+
         await ctx.reply(_(ctx, "Processed records: {count}").format(count=count))
 
     @check.acl2(check.ACLevel.GUILD_OWNER)
