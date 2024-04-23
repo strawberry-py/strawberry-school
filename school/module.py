@@ -1,4 +1,5 @@
 import argparse
+import asyncio
 import json
 import re
 import shlex
@@ -906,7 +907,7 @@ class School(commands.Cog):
     @check.acl2(check.ACLevel.GUILD_OWNER)
     @school_.command(name="import")
     @commands.max_concurrency(1, per=commands.BucketType.default, wait=False)
-    async def school_import(self, ctx):
+    async def school_import(self, ctx: commands.Context):
         """Import school data from scraper."""
         if len(ctx.message.attachments) != 1:
             await ctx.reply(_(ctx, "I'm expecting one JSON file."))
@@ -1493,6 +1494,7 @@ class School(commands.Cog):
 
             subject.import_programs(ctx, programs)
             i += 1
+            await asyncio.sleep(0)
 
         return i
 
