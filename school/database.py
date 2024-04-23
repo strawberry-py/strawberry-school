@@ -79,6 +79,12 @@ class SubjectProgram(database.base):
         session.delete(self)
         session.commit()
 
+    def __repr__(self) -> str:
+        return (
+            f'<{self.__class__.__name__} year="{self.year}" obligation="{self.obligation}"'
+            f'subject="{self.subject}" program="{self.program}">'
+        )
+
 
 class Teacher(database.base):
     __tablename__ = "school_dataset_teacher"
@@ -463,6 +469,7 @@ class Subject(database.base):
                 guild_id=ctx.guild.id,
                 abbreviation=abbreviation,
             )
+            session.add(subject)
 
         name = json_data.get("name", None)
         institute = json_data.get("institute", ["-"])
@@ -561,11 +568,23 @@ class Subject(database.base):
             program = Program.get_or_create(
                 ctx, program_data["abbreviation"], program_data["degree"]
             )
+
+            sub_prog = SubjectProgram.get(
+                subject=self,
+                program=program,
+                year=program_data["year"],
+                obligation=program_data["obligation"],
+            )
+            if sub_prog:
+                continue
+
             sub_prog = SubjectProgram(
                 year=program_data["year"], obligation=program_data["obligation"]
             )
             sub_prog.program = program
-            self.programs.append(sub_prog)
+            sub_prog.subject = self
+            session.add(sub_prog)
+            session.commit()
 
         session.commit()
 
