@@ -536,13 +536,13 @@ class School(commands.Cog):
     @check.acl2(check.ACLevel.MOD)
     @teacher_.group(name="purge")
     async def teacher_purge_(self, ctx):
-        """Purge subjects that are not used."""
+        """Purge teachers that are not used."""
         await utils.discord.send_help(ctx)
 
     @check.acl2(check.ACLevel.MOD)
     @teacher_purge_.command(name="list")
     async def teacher_purge_list(self, ctx):
-        """Show list of subjects used by other modules"""
+        """Show list of teachers used by other modules"""
         teachers = Teacher.get_not_used(ctx)
 
         class Item:
