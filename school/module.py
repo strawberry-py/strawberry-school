@@ -932,7 +932,7 @@ class School(commands.Cog):
             data_file.close()
 
         await guild_log.info(
-            ctx.author, ctx.channel, "Processed and imported {count} school records."
+            ctx.author, ctx.channel, f"Processed and imported {count} school records."
         )
 
         await ctx.reply(_(ctx, "Processed records: {count}").format(count=count))
