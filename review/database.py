@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from abc import ABC
 from datetime import date, timedelta
 from typing import List, Optional, Type, Union
 
@@ -54,8 +53,8 @@ Teacher.add_used_filter_generator(teacher_subjectreview_filter_generator)
 Teacher.add_is_used_check(teacher_is_used)
 
 
-class RelevanceBase(ABC):
-    """Abstract base class for relevance (voting) models.
+class RelevanceBase:
+    """Base class for relevance (voting) models.
 
     Provides shared fields and methods for both SubjectRelevance and TeacherRelevance.
     """
@@ -84,8 +83,8 @@ class RelevanceBase(ABC):
         }
 
 
-class ReviewBase(ABC):
-    """Abstract base class for review models with common functionality.
+class ReviewBase:
+    """Base class for review models with common functionality.
 
     Provides shared fields and methods for both SubjectReview and TeacherReview.
     """
@@ -225,9 +224,9 @@ class SubjectReview(database.base, ReviewBase):
     text_review = Column(String, default=None)
     created = Column(Date)
     updated = Column(Date)
-    subject: Subject = relationship("Subject")
-    guarantor: Teacher = relationship(lambda: Teacher)
-    relevance: List[SubjectRelevance] = relationship(
+    subject = relationship("Subject")
+    guarantor = relationship(lambda: Teacher)
+    relevance = relationship(
         "SubjectRelevance", cascade="all, delete-orphan, delete"
     )
 
