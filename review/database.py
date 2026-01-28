@@ -15,6 +15,7 @@ from sqlalchemy import (
     exists,
     func,
     select,
+    or_,
 )
 from sqlalchemy.orm import column_property, relationship
 
@@ -37,22 +38,14 @@ def teacher_subjectreview_filter_generator():
 
 
 def teacher_is_used(teacher: Teacher) -> bool:
-    query_teacher_review = (
-        session.query(TeacherReview)
-        .filter_by(TeacherReview.teacher_id == teacher.idx)
-        .limit(1)
-        .one_or_none()
-        is not None
-    )
-    query_subject_review = (
-        session.query(SubjectReview)
-        .filter_by(SubjectReview.guarantor_id == teacher.idx)
-        .limit(1)
-        .one_or_none()
-        is not None
-    )
-
-    return query_subject_review or query_teacher_review
+    return session.query(
+        exists().where(
+            or_(
+                TeacherReview.teacher_id == teacher.idx,
+                SubjectReview.guarantor_id == teacher.idx
+            )
+        )
+    ).scalar()
 
 
 Teacher.add_used_filter_generator(teacher_teacherreview_filter_generator)
@@ -210,7 +203,7 @@ class SubjectReview(database.base):
         session.commit()
 
     @staticmethod
-    def avg_grade(subject: Subject) -> int:
+    def avg_grade(subject: Subject) -> Optional[float]:
         """Get average grade of subject"""
         query = session.query(func.avg(SubjectReview.grade)).filter(
             SubjectReview.subject_id == subject.idx
@@ -291,7 +284,7 @@ class SubjectReview(database.base):
         return (
             f'<{self.__class__.__name__} idx="{self.idx}" guild_id="{self.guild_id}" '
             f'author_id="{self.author_id}" anonym="{self.anonym}" '
-            f'subject_id="{self.subject_id}" guarantor_id={self.guarantor_id}" '
+            f'subject_id="{self.subject_id}" guarantor_id="{self.guarantor_id}" '
             f'grade="{self.grade}", text_review="{self.text_review}" created="{self.created}" '
             f'updated="{self.updated}" upvotes="{self.upvotes}" downvotes="{self.downvotes}">'
         )
@@ -458,7 +451,7 @@ class TeacherReview(database.base):
         session.commit()
 
     @staticmethod
-    def avg_grade(teacher: Teacher) -> int:
+    def avg_grade(teacher: Teacher) -> Optional[float]:
         """Get average grade of teacher"""
         query = session.query(func.avg(TeacherReview.grade)).filter(
             TeacherReview.teacher_id == teacher.idx
