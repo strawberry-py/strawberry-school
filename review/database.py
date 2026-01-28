@@ -14,8 +14,8 @@ from sqlalchemy import (
     UniqueConstraint,
     exists,
     func,
-    select,
     or_,
+    select,
 )
 from sqlalchemy.orm import column_property, relationship
 
@@ -226,9 +226,7 @@ class SubjectReview(database.base, ReviewBase):
     updated = Column(Date)
     subject = relationship("Subject")
     guarantor = relationship(lambda: Teacher)
-    relevance = relationship(
-        "SubjectRelevance", cascade="all, delete-orphan, delete"
-    )
+    relevance = relationship("SubjectRelevance", cascade="all, delete-orphan, delete")
 
     upvotes = column_property(
         select(func.count(SubjectRelevance.voter_id))

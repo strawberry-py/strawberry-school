@@ -164,7 +164,9 @@ class School(commands.Cog):
 
         if not subject:
             await ctx.reply(
-                _(ctx, "Subject with abbreviation {abbreviation} not found.").format(abbreviation=abbreviation)
+                _(ctx, "Subject with abbreviation {abbreviation} not found.").format(
+                    abbreviation=abbreviation
+                )
             )
             return
 
