@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import datetime
-from typing import Optional
+from typing import Optional, Union
 
 import discord
 from discord.ext import commands
@@ -11,7 +11,7 @@ import pie.exceptions
 from pie import i18n
 from pie.utils.objects import VotableEmbed
 
-from .database import SubjectReview
+from .database import ReviewBase, SubjectReview, TeacherReview
 
 _ = i18n.Translator("modules/school").translate
 
@@ -29,7 +29,7 @@ class ReviewEmbed(VotableEmbed):
 
     def __init__(
         self,
-        review: SubjectReview,
+        review: Union[SubjectReview, TeacherReview],
         bot: commands.Bot,
         author: Optional[discord.Member] = None,
         footer: Optional[str] = None,
@@ -37,7 +37,7 @@ class ReviewEmbed(VotableEmbed):
         **kwargs,
     ):
         super(ReviewEmbed, self).__init__(*args, **kwargs)
-        self.review: SubjectReview = review
+        self.review: ReviewBase = review
         self.bot: commands.Bot = bot
 
         base_footer = "📩 "
@@ -46,7 +46,7 @@ class ReviewEmbed(VotableEmbed):
         if footer is not None:
             base_footer += " | " + footer
         self.set_footer(
-            icon_url=getattr(author, "avatar_url", None),
+            icon_url=author.display_avatar.url if author else None,
             text=base_footer,
         )
         self.timestamp = datetime.datetime.now(tz=datetime.timezone.utc)
