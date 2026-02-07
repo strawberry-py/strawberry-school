@@ -113,7 +113,7 @@ msgid You can't add and remove same teacher (ID: {id}).
 msgstr Nemůžeš přidat a odebrat stejného učitele (ID: {id}).
 
 msgid Subject successfully edited.
-msgstr
+msgstr Předmět úspěšně upraven.
 
 msgid Already teaching teachers: {teachers}
 msgstr Již učící učitelé: {teachers}
@@ -321,9 +321,6 @@ msgstr Vstupní soubor nemá správné sloupce.
 
 msgid All roles exist already.
 msgstr Všechy role již existují.
-
-msgid All roles exist already
-msgstr Všechny role již existují.
 
 msgid Done.
 msgstr Hotovo.

@@ -1,332 +1,329 @@
 msgid Average grade:
-msgstr
+msgstr Priemerná známka:
 
 msgid Grade must be between 1 and 5 inclusive.
-msgstr
+msgstr Známka musí byť od 1 do 5 vrátane.
 
 msgid Review must contain text.
-msgstr
+msgstr Recenzia musí obsahovať text.
 
 msgid Subject with abbreviation {abbreviation} not found.
-msgstr
+msgstr Predmet so skratkou {abbreviation} sa nenašiel.
 
 msgid Teacher with ID {id} not found.
-msgstr
+msgstr Učiteľ s ID {id} sa nenašiel.
 
 msgid **Guarantor:** {name}
-msgstr
+msgstr **Garant:** {name}
 
 msgid Subject grade: {grade}
-msgstr
+msgstr Známka predmetu: {grade}
 
 msgid Teacher grade: {grade}
-msgstr
+msgstr Známka učiteľa: {grade}
 
 msgid Anonymous
-msgstr
+msgstr Anonym
 
 msgid Unknown user
-msgstr
+msgstr Neznámy používateľ
 
 msgid Review ID #{id}
-msgstr
+msgstr ID recenzie #{id}
 
 msgid Author:
-msgstr
+msgstr Autor:
 
 msgid Updated:
-msgstr
+msgstr Aktualizované:
 
 msgid Date of review:
-msgstr
+msgstr Dátum recenzie:
 
 msgid Text:
-msgstr
+msgstr Text:
 
 msgid Deleting timed out.
-msgstr
+msgstr Časový limit mazania vypršal.
 
 msgid Your review was removed.
-msgstr
+msgstr Tvoja recenzia bola odstránená.
 
 msgid Deleting aborted.
-msgstr
+msgstr Mazanie bolo zrušené.
 
 msgid User's review was removed.
-msgstr
+msgstr Recenzia používateľa bola odstránená.
 
 msgid There are no reviews for this subject.
-msgstr
+msgstr Pre túto tému nie sú žiadne recenzie.
 
 msgid You have no reviews.
-msgstr
+msgstr Nemáš žiadne recenzie.
 
 msgid Your reviews:
-msgstr
+msgstr Tvoje recenzie:
 
 msgid Your review of subject {abbreviation} added.
-msgstr
+msgstr Tvoja recenzia na predmet {abbreviation} bola pridaná.
 
 msgid You have no review of subject {abbreviation}.
-msgstr
+msgstr Nemáš žiadnu recenziu na predmet {abbreviation}.
 
 msgid No review with ID {id}.
-msgstr
+msgstr Žiadna recenzia s ID {id}.
 
 msgid There are no reviews for this teacher.
-msgstr
+msgstr Pre tohto učiteľa nie sú žiadne recenzie.
 
 msgid Your review of teacher {name} added.
-msgstr
+msgstr Tvoja recenzia na učiteľa {name} bola pridaná.
 
 msgid You have no review of teacher {name}.
-msgstr
+msgstr Nemáš žiadnu recenziu na učiteľa {name}.
 
 msgid Your positive vote has been counted.
-msgstr
+msgstr Tvoj pozitívny hlas bol započítaný.
 
 msgid Your vote has been deleted.
-msgstr
+msgstr Tvoj hlas bol odstránený.
 
 msgid Your negative vote has been counted.
-msgstr
+msgstr Tvoj negatívny hlas bol započítaný.
 
 msgid Can't vote on own review!
-msgstr
+msgstr Nemôžeš hlasovať o vlastnej recenzii!
 
 msgid You don't have permissions to vote!
-msgstr
+msgstr Nemáš oprávnenie hlasovať!
 
 msgid Name must be at least 3 characters long.
-msgstr
+msgstr Meno musí mať aspoň 3 znaky.
 
 msgid No subject with name '{name}' found.
-msgstr
+msgstr Nenašiel sa žiadny predmet s názvom '{name}'.
 
 msgid Results for name '{name}':
-msgstr
+msgstr Výsledky pre názov '{name}':
 
 msgid Subject with abbreviation {abbreviation} already exists!
-msgstr
+msgstr Predmet so skratkou {abbreviation} už existuje!
 
 msgid You can't add and remove same teacher (ID: {id}).
-msgstr
+msgstr Nemôžeš pridať a odstrániť toho istého učiteľa (ID: {id}).
 
 msgid Subject successfully edited.
-msgstr
+msgstr Predmet bol úspešne upravený.
 
 msgid Already teaching teachers: {teachers}
-msgstr
+msgstr Už vyučujúci učitelia: {teachers}
 
 msgid Can't remove teachers that don't teach this subject: {teachers}
-msgstr
+msgstr Nemožno odstrániť učiteľov, ktorí tento predmet nevyučujú: {teachers}
 
 msgid Do you want to delete this subject:
-msgstr
+msgstr Chceš tento predmet odstrániť:
 
 msgid Subject {abbreviation} deleted.
-msgstr
+msgstr Predmet {abbreviation} odstránený.
 
 msgid Abbreviation
-msgstr
+msgstr Skratka
 
 msgid Subject name
-msgstr
+msgstr Názov predmetu
 
 msgid No teacher with name '{name}' found.
-msgstr
+msgstr Nenašiel sa žiadny učiteľ s menom '{name}'.
 
 msgid Teacher successfully edited.
-msgstr
+msgstr Učiteľ úspešne upravený.
 
 msgid Do you want to delete this teacher:
-msgstr
+msgstr Chceš vymazať tohto učiteľa:
 
 msgid Teacher {name} deleted.
-msgstr
+msgstr Učiteľ {name} vymazaný.
 
 msgid School ID
-msgstr
+msgstr Školské ID
 
 msgid Teacher name
-msgstr
+msgstr Meno učiteľa
 
 msgid Degree must be B for Bachelor, M for Masters or D for Doctoral.
-msgstr
+msgstr Titul musí byť B pre bakalársky, M pre magisterský alebo D pre doktorandský.
 
 msgid Program with abbreviation {abbreviation} and degree {degree} not found.
-msgstr
+msgstr Program so skratkou {abbreviation} a titulom {degree} sa nenašiel.
 
 msgid Program list
-msgstr
+msgstr Zoznam programov
 
 msgid New degree must be B for Bachelor, M for Masters or D for Doctoral.
-msgstr
+msgstr Nový stupeň musí byť B pre bakalársky, M pre magisterský alebo D pre doktorandský.
 
 msgid A program with the abbreviation '{abbreviation}' and '{degree}' already exists.
-msgstr
+msgstr Program so skratkou '{abbreviation}' a '{degree}' už existuje.
 
 msgid Program successfully edited.
-msgstr
+msgstr Program bol úspešne upravený.
 
 msgid Do you want to delete this program:
-msgstr
+msgstr Chceš tento program odstrániť?
 
 msgid Program {abbreviation} for degree {degree} deleted.
-msgstr
+msgstr Program {abbreviation} pre stupeň {degree} bol odstránený.
 
 msgid I'm expecting one JSON file.
-msgstr
+msgstr Očakávam jeden súbor JSON.
 
 msgid You have to upload a JSON file.
-msgstr
+msgstr Musíte nahrať súbor JSON.
 
 msgid Processing. Make a coffee, it may take a while.
-msgstr
+msgstr pracováva sa. Uvar si kávu, môže to chvíľu trvať.
 
 msgid Your JSON file contains errors.
-msgstr
+msgstr Tvoj súbor JSON obsahuje chyby.
 
 msgid Error reading JSON file.
-msgstr
+msgstr Chyba pri čítaní súboru JSON.
 
 msgid Processed records: {count}
-msgstr
+msgstr Spracované záznamy: {count}
 
 msgid Teacher with ID {id} can't occure in add / remove argument more than once!
-msgstr
+msgstr Učiteľ s ID {id} sa nemôže vyskytnúť v argumente pridania / odstránenia viac ako raz!
 
 msgid Obligation must be:
-msgstr
+msgstr Povinnosť musí byť:
 
 msgid for
-msgstr
+msgstr pre
 
 msgid This combination of program, degree, subject, year and obligation already exists.
-msgstr
+msgstr Táto kombinácia programu, titulu, predmetu, ročníka a povinnosti už existuje.
 
 msgid Subject and program successfully linked.
-msgstr
+msgstr Predmet a program boli úspešne prepojené.
 
 msgid This combination of program, degree, subject, year and obligation does not exist.
-msgstr
+msgstr Táto kombinácia programu, titulu, predmetu, ročníka a povinnosti neexistuje.
 
 msgid Subject and program successfully unlinked.
-msgstr
+msgstr Predmet a program boli úspešne rozviazané.
 
 msgid Bachelor
-msgstr
+msgstr Bakalárske
 
 msgid Masters
-msgstr
+msgstr Magisterske
 
 msgid Doctoral
-msgstr
+msgstr Doktorske
 
 msgid Winter
-msgstr
+msgstr Zimný
 
 msgid Summer
-msgstr
+msgstr Letný
 
 msgid Both
-msgstr
+msgstr Obidva
 
 msgid Optional
-msgstr
+msgstr Voliteľný
 
 msgid Compulsory - optional
-msgstr
+msgstr Povinne - voliteľný
 
 msgid Compulsory
-msgstr
+msgstr Povinný
 
 msgid Other
-msgstr
+msgstr Iný
 
 msgid Recommended
-msgstr
+msgstr Odporúčaný
 
 msgid Optional - specialized
-msgstr
+msgstr Voliteľný - špecializovaný
 
 msgid Error parsing arguments:
-msgstr
+msgstr Chyba pri zpracování argumentov:
 
 msgid Program {abbreviation}
-msgstr
+msgstr Program {abbreviation}
 
 msgid Degree
-msgstr
+msgstr Stupeň
 
 msgid Year: {year}
-msgstr
+msgstr Rok: {year}
 
 msgid Institute
-msgstr
+msgstr Ústav
 
 msgid Semester
-msgstr
+msgstr Semester
 
 msgid URL
-msgstr
+msgstr URL
 
 msgid Guarantor
-msgstr
+msgstr Garant
 
 msgid Teachers
 msgstr Učitelia
 
 msgid **{program}** ({obligation}, year: {year})
-msgstr
+msgstr **{program}** ({obligation}, rok: {year})
 
 msgid Programs - {degree}
-msgstr
+msgstr Programy - {degree}
 
 msgid ID
-msgstr
+msgstr ID
 
 msgid Guaranted subjects
-msgstr
+msgstr Garantované predmety
 
 msgid Teaches
-msgstr
+msgstr Vyučuje
 
 msgid Cannot find specified roles, aborting.
-msgstr
+msgstr Nemožno nájsť zadané role, ruší sa.
 
 msgid Cannot remove role {role} from member {member}.
-msgstr
+msgstr Nemožno odstrániť rolu {role} od člena {member}.
 
 msgid Successfully removed roles from {member_count} members. Continuing...
-msgstr
+msgstr Úspešne odstránené role od {member_count} členov. Pokračujem...
 
 msgid Done, removed {role_count} roles from {member_count} members
-msgstr
+msgstr Hotovo, odstránené role {role_count} od {member_count} členov
 
 msgid Use space-separated list of category names as an argument.
-msgstr
+msgstr Použij zoznam názvov kategórií oddelených medzerami ako argument.
 
 msgid Could not delete overwrites of member {member} in the channel {channel}.
-msgstr
+msgstr Nepodarilo sa odstrániť overwrites člena {member} v kanáli {channel}.
 
 msgid Already visited {channel_count} channels. Continuing...
-msgstr
+msgstr Počet navštívených kanálov: {channel_count}. Pokračujem...
 
 msgid Done, visited {channel_count} channels.
-msgstr
+msgstr Hotovo, navštívených kanálov: {channel_count}.
 
 msgid Input file does not match expected columns
-msgstr
+msgstr Vstupný súbor nezodpovedá očakávaným stĺpcom
 
 msgid All roles exist already.
-msgstr
-
-msgid All roles exist already
-msgstr
+msgstr Všetky role už existujú.
 
 msgid Done.
-msgstr
+msgstr Hotovo.
 
 msgid No teacher channels are set.
 msgstr Nie sú nastavené žiadne kanály pre učiteľov.

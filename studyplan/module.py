@@ -188,7 +188,7 @@ class StudyPlan(commands.Cog):
         if len(missing_roles) > 0:
             await ctx.reply(f"Created missing roles:\n```{' '.join(missing_roles)}```")
         else:
-            await ctx.reply(_(ctx, "All roles exist already"))
+            await ctx.reply(_(ctx, "All roles exist already."))
 
     @check.acl2(check.ACLevel.MOD)
     @commands.command()
