@@ -28,16 +28,31 @@ from ..school.database import Subject, Teacher
 
 
 def teacher_teacherreview_filter_generator():
+    """Filter generator to check if the teacher is used.
+
+    Returns: True if Teacher is used, False otherwise
+    """
     filter = exists().where(Teacher.idx == TeacherReview.teacher_id)
     return filter
 
 
 def teacher_subjectreview_filter_generator():
+    """Filter generator to check if the teacher is used.
+
+    Returns: True if Teacher is used, False otherwise
+    """
     filter = exists().where(Teacher.idx == SubjectReview.guarantor_id)
     return filter
 
 
 def teacher_is_used(teacher: Teacher) -> bool:
+    """Function to check whenever teacher is used
+    in subject or teacher review.
+
+    Args:
+        teacher: Teacher to be checked.
+    Returns: True if Teacher is used, False otherwise
+    """
     return session.query(
         exists().where(
             or_(
