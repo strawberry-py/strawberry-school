@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import date, timedelta
-from typing import List, Optional, Union
+from typing import List, Optional, Type, Union
 
 from sqlalchemy import (
     BigInteger,
@@ -14,6 +14,7 @@ from sqlalchemy import (
     UniqueConstraint,
     exists,
     func,
+    or_,
     select,
 )
 from sqlalchemy.orm import column_property, relationship
@@ -27,32 +28,39 @@ from ..school.database import Subject, Teacher
 
 
 def teacher_teacherreview_filter_generator():
+    """Filter generator to check if the teacher is used.
+
+    Returns: True if Teacher is used, False otherwise
+    """
     filter = exists().where(Teacher.idx == TeacherReview.teacher_id)
     return filter
 
 
 def teacher_subjectreview_filter_generator():
+    """Filter generator to check if the teacher is used.
+
+    Returns: True if Teacher is used, False otherwise
+    """
     filter = exists().where(Teacher.idx == SubjectReview.guarantor_id)
     return filter
 
 
 def teacher_is_used(teacher: Teacher) -> bool:
-    query_teacher_review = (
-        session.query(TeacherReview)
-        .filter_by(TeacherReview.teacher_id == teacher.idx)
-        .limit(1)
-        .one_or_none()
-        is not None
-    )
-    query_subject_review = (
-        session.query(SubjectReview)
-        .filter_by(SubjectReview.guarantor_id == teacher.idx)
-        .limit(1)
-        .one_or_none()
-        is not None
-    )
+    """Function to check whenever teacher is used
+    in subject or teacher review.
 
-    return query_subject_review or query_teacher_review
+    Args:
+        teacher: Teacher to be checked.
+    Returns: True if Teacher is used, False otherwise
+    """
+    return session.query(
+        exists().where(
+            or_(
+                TeacherReview.teacher_id == teacher.idx,
+                SubjectReview.guarantor_id == teacher.idx,
+            )
+        )
+    ).scalar()
 
 
 Teacher.add_used_filter_generator(teacher_teacherreview_filter_generator)
@@ -60,7 +68,108 @@ Teacher.add_used_filter_generator(teacher_subjectreview_filter_generator)
 Teacher.add_is_used_check(teacher_is_used)
 
 
-class SubjectRelevance(database.base):
+class RelevanceBase:
+    """Base class for relevance (voting) models.
+
+    Provides shared fields and methods for both SubjectRelevance and TeacherRelevance.
+    """
+
+    # Common columns - defined in child classes via declarative_base
+    voter_id: int
+    vote: bool
+    review: int
+
+    @staticmethod
+    def reset(review_id: int) -> int:
+        """Reset relevance votes for a review. Must be implemented by subclasses."""
+        raise NotImplementedError("Subclasses must implement reset method")
+
+    def __repr__(self) -> str:
+        return (
+            f'<{self.__class__.__name__} voter_id="{self.voter_id}" vote="{self.vote}" '
+            f'review="{self.review}">'
+        )
+
+    def dump(self) -> dict:
+        return {
+            "voter_id": self.voter_id,
+            "vote": self.vote,
+            "review": self.review,
+        }
+
+
+class ReviewBase:
+    """Base class for review models with common functionality.
+
+    Provides shared fields and methods for both SubjectReview and TeacherReview.
+    """
+
+    # Common columns - defined in child classes via declarative_base
+    idx: int
+    guild_id: int
+    author_id: int
+    anonym: bool
+    grade: int
+    text_review: str
+    created: date
+    updated: date
+    upvotes: int
+    downvotes: int
+
+    @property
+    def relevance_class(self) -> Type[RelevanceBase]:
+        """Return the appropriate relevance class for this review type."""
+        raise NotImplementedError("Subclasses must implement relevance_class property")
+
+    def vote(
+        self, user: Union[discord.User, discord.Member], vote: Optional[bool]
+    ) -> None:
+        """Add or edit user's vote.
+
+        Args:
+            user: Voting Discord user
+            vote: True if upvote, False if downvote, None if delete
+        """
+        db_vote: Optional[RelevanceBase] = (
+            session.query(self.relevance_class)
+            .filter_by(review=self.idx)
+            .filter_by(voter_id=user.id)
+            .one_or_none()
+        )
+
+        if vote is None:
+            if not db_vote:
+                return
+
+            session.delete(db_vote)
+            session.commit()
+            return
+
+        if not db_vote:
+            db_vote = self.relevance_class(review=self.idx, voter_id=user.id)
+
+        db_vote.vote = vote
+
+        session.merge(db_vote)
+        session.commit()
+
+    def _edit_common(self, grade: int, anonym: bool, text: str) -> None:
+        """Edit common review fields. Reset relevance for reviews edited after 1 month."""
+        if (date.today() - self.updated) > timedelta(days=30):
+            self.relevance_class.reset(self.idx)
+
+        self.grade = grade
+        self.anonym = anonym
+        self.text_review = text
+        self.updated = date.today()
+
+    def delete(self) -> None:
+        """Delete review"""
+        session.delete(self)
+        session.commit()
+
+
+class SubjectRelevance(database.base, RelevanceBase):
     """Holds user votes for subject reviews.
 
     Args:
@@ -80,26 +189,13 @@ class SubjectRelevance(database.base):
     )
 
     @staticmethod
-    def reset(review_id: int):
+    def reset(review_id: int) -> int:
         result = session.query(SubjectRelevance).filter_by(review=review_id).delete()
         session.commit()
         return result
 
-    def __repr__(self) -> str:
-        return (
-            f'<{self.__class__.__name__} voter_id="{self.voter_id}" vote="{self.vote}" '
-            f'review="{self.review}">'
-        )
 
-    def dump(self) -> dict:
-        return {
-            "voter_id": self.voter_id,
-            "vote": self.vote,
-            "review": self.review,
-        }
-
-
-class SubjectReview(database.base):
+class SubjectReview(database.base, ReviewBase):
     """Holds information about subject reviews and all the logic.
 
     Args:
@@ -160,57 +256,20 @@ class SubjectReview(database.base):
         .scalar_subquery()
     )
 
-    def vote(self, user: Union[discord.User, discord.Member], vote: Optional[bool]):
-        """Add or edit user's vote
+    @property
+    def relevance_class(self) -> Type[SubjectRelevance]:
+        """Return SubjectRelevance class for subject reviews."""
+        return SubjectRelevance
 
-        Args:
-            user: Voting Discord user
-            vote: True if upvote, False if downvote, None if delete
-        """
-        db_vote = (
-            session.query(SubjectRelevance)
-            .filter_by(review=self.idx)
-            .filter_by(voter_id=user.id)
-            .one_or_none()
-        )
-
-        if vote is None:
-            if not db_vote:
-                return
-
-            session.delete(db_vote)
-            session.commit()
-            return
-
-        if not db_vote:
-            db_vote = SubjectRelevance(review=self.idx, voter_id=user.id)
-
-        db_vote.vote = vote
-
-        session.merge(db_vote)
-        session.commit()
-
-    def edit(self, grade: int, anonym: bool, text: str):
+    def edit(self, grade: int, anonym: bool, text: str) -> None:
         """Edit review information. Reset relevance for reviews
         lastly edited before 1 month."""
-        if (date.today() - self.updated) > timedelta(days=30):
-            SubjectRelevance.reset(self.idx)
-
-        self.grade = grade
-        self.anonym = anonym
-        self.text_review = text
-        self.updated = date.today()
+        self._edit_common(grade, anonym, text)
         self.guarantor_id = self.subject.guarantor_id
-
-        session.commit()
-
-    def delete(self):
-        """Delete review"""
-        session.delete(self)
         session.commit()
 
     @staticmethod
-    def avg_grade(subject: Subject) -> int:
+    def avg_grade(subject: Subject) -> Optional[float]:
         """Get average grade of subject"""
         query = session.query(func.avg(SubjectReview.grade)).filter(
             SubjectReview.subject_id == subject.idx
@@ -291,7 +350,7 @@ class SubjectReview(database.base):
         return (
             f'<{self.__class__.__name__} idx="{self.idx}" guild_id="{self.guild_id}" '
             f'author_id="{self.author_id}" anonym="{self.anonym}" '
-            f'subject_id="{self.subject_id}" guarantor_id={self.guarantor_id}" '
+            f'subject_id="{self.subject_id}" guarantor_id="{self.guarantor_id}" '
             f'grade="{self.grade}", text_review="{self.text_review}" created="{self.created}" '
             f'updated="{self.updated}" upvotes="{self.upvotes}" downvotes="{self.downvotes}">'
         )
@@ -314,7 +373,7 @@ class SubjectReview(database.base):
         }
 
 
-class TeacherRelevance(database.base):
+class TeacherRelevance(database.base, RelevanceBase):
     """Holds user votes for teacher reviews.
 
     Args:
@@ -334,26 +393,13 @@ class TeacherRelevance(database.base):
     )
 
     @staticmethod
-    def reset(review_id: int):
+    def reset(review_id: int) -> int:
         result = session.query(TeacherRelevance).filter_by(review=review_id).delete()
         session.commit()
         return result
 
-    def __repr__(self) -> str:
-        return (
-            f'<{self.__class__.__name__} voter_id="{self.voter_id}" vote="{self.vote}" '
-            f'review="{self.review}">'
-        )
 
-    def dump(self) -> dict:
-        return {
-            "voter_id": self.voter_id,
-            "vote": self.vote,
-            "review": self.review,
-        }
-
-
-class TeacherReview(database.base):
+class TeacherReview(database.base, ReviewBase):
     """Holds information about teacher reviews and all the logic.
 
     Args:
@@ -409,56 +455,19 @@ class TeacherReview(database.base):
         .scalar_subquery()
     )
 
-    def vote(self, user: Union[discord.User, discord.Member], vote: Optional[bool]):
-        """Add or edit user's vote
+    @property
+    def relevance_class(self) -> Type[TeacherRelevance]:
+        """Return TeacherRelevance class for teacher reviews."""
+        return TeacherRelevance
 
-        Args:
-            user: Voting Discord user
-            vote: True if upvote, False if downvote, None if delete
-        """
-        db_vote = (
-            session.query(TeacherRelevance)
-            .filter_by(review=self.idx)
-            .filter_by(voter_id=user.id)
-            .one_or_none()
-        )
-
-        if vote is None:
-            if not db_vote:
-                return
-
-            session.delete(db_vote)
-            session.commit()
-            return
-
-        if not db_vote:
-            db_vote = TeacherRelevance(review=self.idx, voter_id=user.id)
-
-        db_vote.vote = vote
-
-        session.merge(db_vote)
-        session.commit()
-
-    def edit(self, grade: int, anonym: bool, text: str):
+    def edit(self, grade: int, anonym: bool, text: str) -> None:
         """Edit review information. Reset relevance for reviews
         lastly edited before 1 month."""
-        if (date.today() - self.updated) > timedelta(days=30):
-            TeacherRelevance.reset(self.idx)
-
-        self.grade = grade
-        self.anonym = anonym
-        self.text_review = text
-        self.updated = date.today()
-
-        session.commit()
-
-    def delete(self):
-        """Delete review"""
-        session.delete(self)
+        self._edit_common(grade, anonym, text)
         session.commit()
 
     @staticmethod
-    def avg_grade(teacher: Teacher) -> int:
+    def avg_grade(teacher: Teacher) -> Optional[float]:
         """Get average grade of teacher"""
         query = session.query(func.avg(TeacherReview.grade)).filter(
             TeacherReview.teacher_id == teacher.idx

@@ -62,12 +62,12 @@ class CommandParser(argparse.ArgumentParser):
 
 
 class SchoolExtend:
-    _teacher_extension = []
-    _subject_extension = []
-    _program_extension = []
+    _teacher_extension: List[Callable] = []
+    _subject_extension: List[Callable] = []
+    _program_extension: List[Callable] = []
 
     @staticmethod
-    def add_teacher_extension(func: Callable):
+    def add_teacher_extension(func: Callable) -> None:
         """Add callable to list of functions which are called
         when creating teacher info embed. Function must be static
         and must take this arguments:
@@ -84,7 +84,7 @@ class SchoolExtend:
             SchoolExtend._teacher_extension.append(func)
 
     @staticmethod
-    def remove_teacher_extension(func: Callable):
+    def remove_teacher_extension(func: Callable) -> None:
         """Remove callable from list of functions called when
         creating teacher info embed.
         """
@@ -92,7 +92,7 @@ class SchoolExtend:
             SchoolExtend._teacher_extension.remove(func)
 
     @staticmethod
-    def add_subject_extension(func: Callable):
+    def add_subject_extension(func: Callable) -> None:
         """Add callable to list of functions which are called
         when creating subject info embed. Function must be static
         and must take this arguments:
@@ -109,7 +109,7 @@ class SchoolExtend:
             SchoolExtend._subject_extension.append(func)
 
     @staticmethod
-    def remove_subject_extension(func: Callable):
+    def remove_subject_extension(func: Callable) -> None:
         """Remove callable from list of functions called when
         creating subject info embed.
         """
@@ -117,7 +117,7 @@ class SchoolExtend:
             SchoolExtend._subject_extension.remove(func)
 
     @staticmethod
-    def add_program_extension(func: Callable):
+    def add_program_extension(func: Callable) -> None:
         """Add callable to list of functions which are called
         when creating program info embed. Function must be static
         and must take this arguments:
@@ -133,7 +133,7 @@ class SchoolExtend:
             SchoolExtend._program_extension.append(func)
 
     @staticmethod
-    def remove_program_extension(func: Callable):
+    def remove_program_extension(func: Callable) -> None:
         """Remove callable from list of functions called when
         creating program info embed.
         """
@@ -150,12 +150,12 @@ class School(commands.Cog):
     @commands.guild_only()
     @check.acl2(check.ACLevel.MEMBER)
     @commands.group(name="subject")
-    async def subject_(self, ctx):
+    async def subject_(self, ctx: commands.Context) -> None:
         await utils.discord.send_help(ctx)
 
     @check.acl2(check.ACLevel.MEMBER)
     @subject_.command(name="info")
-    async def subject_info(self, ctx, abbreviation):
+    async def subject_info(self, ctx: commands.Context, abbreviation: str) -> None:
         """Show subject informations
         Args:
             abbreviation: Short name of subject
@@ -176,14 +176,14 @@ class School(commands.Cog):
 
     @check.acl2(check.ACLevel.MEMBER)
     @subject_.command(name="search", aliases=["list"])
-    async def subject_search(self, ctx, *, name: str):
+    async def subject_search(self, ctx: commands.Context, *, name: str) -> None:
         """Search subject by name.
 
         Args:
-            name: Subject's name (atleast 3 chars)
+            name: Subject's name (at least 3 chars)
         """
         if len(name) < 3:
-            await ctx.reply(_(ctx, "Name must be atleast 3 characters long."))
+            await ctx.reply(_(ctx, "Name must be at least 3 characters long."))
             return
 
         subjects = Subject.search(ctx, name)
@@ -225,7 +225,9 @@ class School(commands.Cog):
 
     @check.acl2(check.ACLevel.MOD)
     @subject_.command(name="edit")
-    async def subject_edit(self, ctx, abbreviation: str, *, parameters: str):
+    async def subject_edit(
+        self, ctx: commands.Context, abbreviation: str, *, parameters: str
+    ) -> None:
         """Edit existing subject.
 
         Only include the arguments you want to change.
@@ -305,7 +307,7 @@ class School(commands.Cog):
             args.abbreviation, args.name, args.institute, args.semester, guarantor
         )
 
-        message = _(ctx, "Subject successfuly edited.")
+        message = _(ctx, "Subject successfully edited.")
 
         if teachers_add and add_ignore:
             message += "\n" + _(ctx, "Already teaching teachers: {teachers}").format(
@@ -327,7 +329,7 @@ class School(commands.Cog):
 
     @check.acl2(check.ACLevel.MOD)
     @subject_.command(name="delete")
-    async def subject_delete(self, ctx, abbreviation: str):
+    async def subject_delete(self, ctx: commands.Context, abbreviation: str) -> None:
         """Delete subject.
 
         Args:
@@ -369,13 +371,13 @@ class School(commands.Cog):
 
     @check.acl2(check.ACLevel.MOD)
     @subject_.group(name="purge")
-    async def subject_purge_(self, ctx):
+    async def subject_purge_(self, ctx: commands.Context) -> None:
         """Purge subjects that are not used."""
         await utils.discord.send_help(ctx)
 
     @check.acl2(check.ACLevel.MOD)
     @subject_purge_.command(name="list")
-    async def subject_purge_list(self, ctx):
+    async def subject_purge_list(self, ctx: commands.Context) -> None:
         """Show list of subjects used by other modules"""
         subjects = Subject.get_not_used(ctx)
 
@@ -405,12 +407,12 @@ class School(commands.Cog):
     @commands.guild_only()
     @check.acl2(check.ACLevel.MEMBER)
     @commands.group(name="teacher")
-    async def teacher_(self, ctx):
+    async def teacher_(self, ctx: commands.Context) -> None:
         await utils.discord.send_help(ctx)
 
     @check.acl2(check.ACLevel.MEMBER)
     @teacher_.command(name="info")
-    async def teacher_info(self, ctx, teacher_id: int):
+    async def teacher_info(self, ctx: commands.Context, teacher_id: int) -> None:
         """Show teacher informations
 
         Args:
@@ -430,14 +432,14 @@ class School(commands.Cog):
 
     @check.acl2(check.ACLevel.MEMBER)
     @teacher_.command(name="search", aliases=["list"])
-    async def teacher_search(self, ctx, name):
+    async def teacher_search(self, ctx: commands.Context, name: str) -> None:
         """Search teacher by name.
 
         Args:
-            name: Teacher's name (atleast 3 chars)
+            name: Teacher's name (at least 3 chars)
         """
         if len(name) < 3:
-            await ctx.reply(_(ctx, "Name must be atleast 3 characters long."))
+            await ctx.reply(_(ctx, "Name must be at least 3 characters long."))
             return
 
         teachers = Teacher.search(ctx, name)
@@ -479,7 +481,7 @@ class School(commands.Cog):
 
     @check.acl2(check.ACLevel.MOD)
     @teacher_.command(name="edit")
-    async def teacher_edit(self, ctx, id: int, *, name: str):
+    async def teacher_edit(self, ctx: commands.Context, id: int, *, name: str) -> None:
         """Edit existing teacher.
 
         Args:
@@ -495,13 +497,13 @@ class School(commands.Cog):
 
         teacher.edit(name)
 
-        await ctx.reply(_(ctx, "Teacher succesfuly edited."))
+        await ctx.reply(_(ctx, "Teacher successfully edited."))
 
         await guild_log.info(ctx.author, ctx.channel, f"Teacher {id} edited.")
 
     @check.acl2(check.ACLevel.MOD)
     @teacher_.command(name="delete")
-    async def teacher_delete(self, ctx, id: int):
+    async def teacher_delete(self, ctx: commands.Context, id: int) -> None:
         """Delete teacher.
 
         Args:
@@ -535,13 +537,13 @@ class School(commands.Cog):
 
     @check.acl2(check.ACLevel.MOD)
     @teacher_.group(name="purge")
-    async def teacher_purge_(self, ctx):
+    async def teacher_purge_(self, ctx: commands.Context) -> None:
         """Purge teachers that are not used."""
         await utils.discord.send_help(ctx)
 
     @check.acl2(check.ACLevel.MOD)
     @teacher_purge_.command(name="list")
-    async def teacher_purge_list(self, ctx):
+    async def teacher_purge_list(self, ctx: commands.Context) -> None:
         """Show list of teachers used by other modules"""
         teachers = Teacher.get_not_used(ctx)
 
@@ -571,12 +573,14 @@ class School(commands.Cog):
     @commands.guild_only()
     @check.acl2(check.ACLevel.MEMBER)
     @commands.group(name="program")
-    async def program_(self, ctx):
+    async def program_(self, ctx: commands.Context) -> None:
         await utils.discord.send_help(ctx)
 
     @check.acl2(check.ACLevel.MEMBER)
     @program_.command(name="info")
-    async def program_info(self, ctx, degree: str, abbreviation: str):
+    async def program_info(
+        self, ctx: commands.Context, degree: str, abbreviation: str
+    ) -> None:
         """Show program informations
 
         Args:
@@ -612,12 +616,14 @@ class School(commands.Cog):
 
     @check.acl2(check.ACLevel.MEMBER)
     @program_.command(name="list", aliases=["search"])
-    async def program_list(self, ctx, *, degree: str = None):
+    async def program_list(
+        self, ctx: commands.Context, *, degree: Optional[str] = None
+    ) -> None:
         """List programs"""
         degree = degree.upper() if degree is not None else None
 
         if degree and degree not in DEGREE_MAPPING:
-            ctx.reply(
+            await ctx.reply(
                 _(
                     ctx,
                     "Degree must be B for Bachelor, M for Masters or D for Doctoral.",
@@ -649,8 +655,8 @@ class School(commands.Cog):
     @check.acl2(check.ACLevel.MOD)
     @program_.command(name="edit")
     async def program_edit(
-        self, ctx, degree: str, abbreviation: str, *, parameters: str
-    ):
+        self, ctx: commands.Context, degree: str, abbreviation: str, *, parameters: str
+    ) -> None:
         """Edit existing program.
 
         Only include the arguments you want to change.
@@ -725,7 +731,7 @@ class School(commands.Cog):
         degree = DEGREE_MAPPING[args.degree.upper()] if args.degree else None
         program.edit(args.abbreviation, args.name, degree)
 
-        await ctx.reply(_(ctx, "Program successfuly edited."))
+        await ctx.reply(_(ctx, "Program successfully edited."))
 
         log_message = f"Program '{abbreviation}' edited."
         if args.abbreviation:
@@ -735,7 +741,9 @@ class School(commands.Cog):
 
     @check.acl2(check.ACLevel.MOD)
     @program_.command(name="delete")
-    async def program_delete(self, ctx, degree: str, abbreviation: str):
+    async def program_delete(
+        self, ctx: commands.Context, degree: str, abbreviation: str
+    ) -> None:
         """Delete program.
 
         Args:
@@ -792,20 +800,20 @@ class School(commands.Cog):
 
     @check.acl2(check.ACLevel.MEMBER)
     @program_.group(name="subject")
-    async def program_subject_(self, ctx):
+    async def program_subject_(self, ctx: commands.Context) -> None:
         await utils.discord.send_help(ctx)
 
     @check.acl2(check.ACLevel.MOD)
     @program_subject_.command(name="add")
     async def program_subject_add(
         self,
-        ctx,
+        ctx: commands.Context,
         degree: str,
         program_abbreviation: str,
         subject_abbreviation: str,
         year: int,
         obligation: str,
-    ):
+    ) -> None:
         """Link program and subject.
 
         Args:
@@ -823,13 +831,13 @@ class School(commands.Cog):
     @program_subject_.command(name="remove")
     async def program_subject_remove(
         self,
-        ctx,
+        ctx: commands.Context,
         degree: str,
         program_abbreviation: str,
         subject_abbreviation: str,
         year: int,
         obligation: str,
-    ):
+    ) -> None:
         """Unlink program and subject.
 
         Args:
@@ -845,20 +853,20 @@ class School(commands.Cog):
 
     @check.acl2(check.ACLevel.MOD)
     @subject_.group(name="program")
-    async def subject_program(self, ctx):
+    async def subject_program(self, ctx: commands.Context) -> None:
         await utils.discord.send_help(ctx)
 
     @check.acl2(check.ACLevel.MOD)
     @subject_program.command(name="add")
     async def subject_program_add(
         self,
-        ctx,
+        ctx: commands.Context,
         subject_abbreviation: str,
         degree: str,
         program_abbreviation: str,
         year: int,
         obligation: str,
-    ):
+    ) -> None:
         """Link program and subject.
 
         Args:
@@ -876,13 +884,13 @@ class School(commands.Cog):
     @subject_program.command(name="remove")
     async def subject_program_remove(
         self,
-        ctx,
+        ctx: commands.Context,
         subject_abbreviation: str,
         degree: str,
         program_abbreviation: str,
         year: int,
         obligation: str,
-    ):
+    ) -> None:
         """Unlink program and subject.
 
         Args:
@@ -901,7 +909,7 @@ class School(commands.Cog):
     @commands.guild_only()
     @check.acl2(check.ACLevel.GUILD_OWNER)
     @commands.group(name="school")
-    async def school_(self, ctx):
+    async def school_(self, ctx: commands.Context) -> None:
         await utils.discord.send_help(ctx)
 
     @check.acl2(check.ACLevel.GUILD_OWNER)
@@ -927,6 +935,11 @@ class School(commands.Cog):
                     _(ctx, "Your JSON file contains errors.") + f"\n> `{str(exc)}`"
                 )
                 return
+            except Exception as exc:
+                await ctx.reply(
+                    _(ctx, "Error reading JSON file.") + f"\n> `{str(exc)}`"
+                )
+                return
 
             count = await self._import_school_data(ctx, json_data)
             data_file.close()
@@ -939,7 +952,7 @@ class School(commands.Cog):
 
     @check.acl2(check.ACLevel.GUILD_OWNER)
     @school_.command(name="export")
-    async def school_export(self, ctx):
+    async def school_export(self, ctx: commands.Context) -> None:
         """Export all school data"""
         await ctx.send("Not implemented yet")
         # TODO
@@ -947,7 +960,7 @@ class School(commands.Cog):
     # HELPER FUNCTIONS
 
     async def _parse_teachers_args(
-        self, ctx, teachers: List[int]
+        self, ctx: commands.Context, teachers: List[int]
     ) -> Optional[List[Teacher]]:
         """Helper function used in subject editing for getting
         list of Teacher objects from list of their school IDs"""
@@ -974,20 +987,20 @@ class School(commands.Cog):
 
     async def _link_program_subject(
         self,
-        ctx,
+        ctx: commands.Context,
         degree: str,
         program_abbreviation: str,
         subject_abbreviation: str,
         year: int,
         obligation: str,
-    ):
-        """Main logic for linkin program and subject together.
+    ) -> None:
+        """Main logic for linking program and subject together.
 
         Args:
             degree: Program degree
             program_abbreviation: Program abbreviation
             subject_abbreviation: Subject abbreviation
-            year: Year in which students of program has this subject
+            year: Year in which students of program have this subject
             obligation: Subject obligation for this program
         """
         program = Program.get_by_abbreviation(ctx, degree, program_abbreviation)
@@ -1014,17 +1027,18 @@ class School(commands.Cog):
 
         if obligation not in OBLIGATIONS:
             message = _(ctx, "Obligation must be:")
-            for obligation in OBLIGATIONS:
+            for obl in OBLIGATIONS:
                 message += (
                     "\n**"
-                    + obligation
+                    + obl
                     + "** "
                     + _(ctx, "for")
                     + " "
-                    + School._translate_obligation(obligation)
+                    + School._translate_obligation(ctx, obl)
                 )
 
             await ctx.reply(message)
+            return
 
         if SubjectProgram.get(subject, program, year, obligation):
             await ctx.reply(
@@ -1037,7 +1051,7 @@ class School(commands.Cog):
 
         SubjectProgram.add_relation(subject, program, year, obligation)
 
-        await ctx.reply(_(ctx, "Subject and program succesfully linked."))
+        await ctx.reply(_(ctx, "Subject and program successfully linked."))
 
         await guild_log.info(
             ctx.author,
@@ -1047,20 +1061,20 @@ class School(commands.Cog):
 
     async def _unlink_program_subject(
         self,
-        ctx,
+        ctx: commands.Context,
         degree: str,
         program_abbreviation: str,
         subject_abbreviation: str,
         year: int,
         obligation: str,
-    ):
-        """Main logic for unlinkin program and subject.
+    ) -> None:
+        """Main logic for unlinking program and subject.
 
         Args:
             degree: Program degree
             program_abbreviation: Program abbreviation
             subject_abbreviation: Subject abbreviation
-            year: Year in which students of program has this subject
+            year: Year in which students of program have this subject
             obligation: Subject obligation for this program
         """
         program = Program.get_by_abbreviation(ctx, degree, program_abbreviation)
@@ -1087,17 +1101,18 @@ class School(commands.Cog):
 
         if obligation not in OBLIGATIONS:
             message = _(ctx, "Obligation must be:")
-            for obligation in OBLIGATIONS:
+            for obl in OBLIGATIONS:
                 message += (
                     "\n**"
-                    + obligation
+                    + obl
                     + "** "
                     + _(ctx, "for")
                     + " "
-                    + School._translate_obligation(obligation)
+                    + School._translate_obligation(ctx, obl)
                 )
 
             await ctx.reply(message)
+            return
 
         relation = SubjectProgram.get(subject, program, year, obligation)
 
@@ -1105,14 +1120,14 @@ class School(commands.Cog):
             await ctx.reply(
                 _(
                     ctx,
-                    "This combination of program, degree, subject, year and obligation does not exists.",
+                    "This combination of program, degree, subject, year and obligation does not exist.",
                 )
             )
             return
 
         relation.delete()
 
-        await ctx.reply(_(ctx, "Subject and program succesfully unlinked."))
+        await ctx.reply(_(ctx, "Subject and program successfully unlinked."))
 
         await guild_log.info(
             ctx.author,
@@ -1121,7 +1136,7 @@ class School(commands.Cog):
         )
 
     @staticmethod
-    def _translate_degree(ctx, degree: str) -> str:
+    def _translate_degree(ctx: commands.Context, degree: str) -> str:
         """Translate degree"""
         if degree == "Bachelor":
             return _(ctx, "Bachelor")
@@ -1133,7 +1148,7 @@ class School(commands.Cog):
             return "-"
 
     @staticmethod
-    def _translate_semester(ctx, semester: str) -> str:
+    def _translate_semester(ctx: commands.Context, semester: str) -> str:
         """Translate semester"""
         if semester == "Winter":
             return _(ctx, "Winter")
@@ -1144,7 +1159,8 @@ class School(commands.Cog):
         else:
             return "-"
 
-    def _translate_obligation(ctx, obligation: str) -> str:
+    @staticmethod
+    def _translate_obligation(ctx: commands.Context, obligation: str) -> str:
         """Translate obligation from it's czech shortcut"""
         if obligation == "V":
             return _(ctx, "Optional")
@@ -1213,7 +1229,7 @@ class School(commands.Cog):
         return args
 
     async def _get_program_embed(
-        self, ctx, program: Program, extend=False
+        self, ctx: commands.Context, program: Program, extend: bool = False
     ) -> discord.Embed:
         """Get program information embed. Uses SchoolExtend
         to provide extended information from registered
@@ -1280,7 +1296,7 @@ class School(commands.Cog):
         return embed
 
     async def _get_subject_embed(
-        self, ctx, subject: Subject, extend=False
+        self, ctx: commands.Context, subject: Subject, extend: bool = False
     ) -> discord.Embed:
         """Get subject information embed. Uses SchoolExtend
         to provide extended information from registered
@@ -1360,7 +1376,7 @@ class School(commands.Cog):
         return embed
 
     async def _get_teacher_embed(
-        self, ctx, teacher: Teacher, extend=False
+        self, ctx: commands.Context, teacher: Teacher, extend: bool = False
     ) -> discord.Embed:
         """Get teacher information embed. Uses SchoolExtend
         to provide extended information from registered
@@ -1407,15 +1423,17 @@ class School(commands.Cog):
         return embed
 
     @staticmethod
-    def _split_list(li, n):
+    def _split_list(li: List, n: int):
         """Splits list into smaller list of size n.
 
-        Should be mobed to Pie.utils
+        Should be moved to Pie.utils
         """
         for i in range(0, len(li), n):
             yield li[i : i + n]
 
-    async def _import_teachers(self, ctx, json_data):
+    async def _import_teachers(
+        self, ctx: commands.Context, json_data: dict
+    ) -> List[Teacher]:
         """Import teachers from JSON data"""
         teachers = []
         for id, name in json_data.items():
@@ -1423,7 +1441,9 @@ class School(commands.Cog):
 
         return teachers
 
-    async def _import_programs(self, ctx, json_data, degree):
+    async def _import_programs(
+        self, ctx: commands.Context, json_data: list, degree: Optional[str]
+    ) -> List[dict]:
         """Import programs from JSON data"""
         programs = []
         for program_data in json_data:

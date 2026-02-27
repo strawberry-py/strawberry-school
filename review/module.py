@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import textwrap
-from typing import Iterator, List, Optional
+from typing import Iterator, List, Optional, Type, Union
 
 import discord
 from discord.ext import commands
@@ -11,7 +11,7 @@ from pie.utils.objects import ConfirmView, ScrollableVotingEmbed
 
 from ..school.database import Subject, Teacher
 from ..school.module import SchoolExtend
-from .database import SubjectReview, TeacherReview
+from .database import ReviewBase, SubjectReview, TeacherReview
 from .objects import ReviewEmbed
 
 _ = i18n.Translator("modules/school").translate
@@ -38,7 +38,7 @@ class Review(commands.Cog):
     def _extend_subject(ctx: commands.Context, embed: discord.Embed, subject: Subject):
         """Extends subject information from School module"""
         grade = SubjectReview.avg_grade(subject)
-        grade = "{:.1f}".format(grade) if grade else "-"
+        grade = f"{grade:.1f}" if grade else "-"
         embed.add_field(
             name=_(ctx, "Average grade:"),
             value=grade,
@@ -47,16 +47,74 @@ class Review(commands.Cog):
 
     @staticmethod
     def _extend_teacher(ctx: commands.Context, embed: discord.Embed, teacher: Teacher):
-        """Extends subject information from School module"""
+        """Extends teacher information from School module"""
         grade = TeacherReview.avg_grade(teacher)
-        grade = "{:.1f}".format(grade) if grade else "-"
+        grade = f"{grade:.1f}" if grade else "-"
         embed.add_field(
             name=_(ctx, "Average grade:"),
             value=grade,
             inline=False,
         )
 
-    # Helper functions
+    # Helper functions - Validation
+
+    async def _validate_grade(self, ctx: commands.Context, grade: int) -> bool:
+        """Validate grade is within acceptable range.
+
+        Returns:
+            True if valid, False otherwise (error message sent to user)
+        """
+        if grade < 1 or grade > 5:
+            await ctx.send(_(ctx, "Grade must be between 1 and 5 inclusive."))
+            return False
+        return True
+
+    async def _validate_review_text(self, ctx: commands.Context, text: str) -> bool:
+        """Validate review text is not empty.
+
+        Returns:
+            True if valid, False otherwise (error message sent to user)
+        """
+        if text is None or not len(text):
+            await ctx.send(_(ctx, "Review must contain text."))
+            return False
+        return True
+
+    # Helper functions - Entity Retrieval
+
+    async def _get_subject_or_reply(
+        self, ctx: commands.Context, abbreviation: str
+    ) -> Optional[Subject]:
+        """Get subject by abbreviation or send error message.
+
+        Returns:
+            Subject if found, None otherwise (error message sent to user)
+        """
+        subject = Subject.get_by_abbreviation(ctx, abbreviation)
+        if not subject:
+            await ctx.send(
+                _(ctx, "Subject with abbreviation {abbreviation} not found.").format(
+                    abbreviation=abbreviation
+                )
+            )
+        return subject
+
+    async def _get_teacher_or_reply(
+        self, ctx: commands.Context, teacher_id: int
+    ) -> Optional[Teacher]:
+        """Get teacher by school ID or send error message.
+
+        Returns:
+            Teacher if found, None otherwise (error message sent to user)
+        """
+        teacher = Teacher.get_by_sid(ctx, teacher_id)
+        if not teacher:
+            await ctx.send(
+                _(ctx, "Teacher with ID {id} not found.").format(id=teacher_id)
+            )
+        return teacher
+
+    # Helper functions - Embed Creation
 
     def _get_subject_review_embed(
         self,
@@ -66,29 +124,27 @@ class Review(commands.Cog):
         sudo: bool = False,
         delete: bool = False,
     ) -> ReviewEmbed:
-        """Create subject review embed"""
-        if review.anonym and not sudo:
-            name = _(ctx, "Anonymous")
-        else:
-            name = self.bot.get_user(review.author_id) or _(ctx, "Unknown user")
+        """Create a formatted Discord embed for displaying a subject review.
 
+        Args:
+            ctx: Command context for translation and author info
+            subject: The Subject being reviewed
+            review: SubjectReview database object with review data
+            sudo: If True, reveals author name for anonymous reviews (default: False)
+            delete: If True, formats as deletion confirmation prompt (default: False)
+
+        Returns:
+            ReviewEmbed with voting functionality and formatted review details.
+
+        Note:
+            Guarantor names are italicized if different from current guarantor.
+            Review text is wrapped to 1024 character chunks for Discord limits.
+        """
         title = (
             _(ctx, "Review for subject '{abbreviation}':")
             if not delete
             else _(ctx, "Do you want to delete review for subject '{abbreviation}'?")
-        )
-
-        title = title.format(abbreviation=subject.abbreviation)
-
-        embed = ReviewEmbed(
-            author=ctx.author,
-            title=title,
-            description=subject.name if subject.name else None,
-            color=discord.Color.green(),
-            url=None,
-            review=review,
-            bot=self.bot,
-        )
+        ).format(abbreviation=subject.abbreviation)
 
         guarantor = review.guarantor.name if review.guarantor else "-"
         guarantor = (
@@ -97,43 +153,20 @@ class Review(commands.Cog):
             else guarantor
         )
 
-        embed.add_field(
-            name=_(ctx, "Review ID #{id}").format(id=review.idx),
-            value=_(ctx, "**Guarantor:** {name}").format(name=guarantor),
-            inline=False,
+        additional_info = _(ctx, "**Guarantor:** {name}").format(name=guarantor)
+        additional_info += "\n" + _(ctx, "Subject grade: {grade}").format(
+            grade=review.grade
         )
 
-        embed.add_field(
-            name=_(ctx, "Author:"),
-            value=name,
+        return self._create_review_embed(
+            ctx=ctx,
+            review=review,
+            title_template=title,
+            title_format={},
+            description=subject.name,
+            additional_info=additional_info,
+            sudo=sudo,
         )
-
-        if review.created != review.updated:
-            embed.add_field(
-                name=_(ctx, "Updated:"),
-                value=review.updated,
-            )
-        embed.add_field(
-            name=_(ctx, "Subject grade:"),
-            value=str(review.grade),
-        )
-
-        embed.add_field(
-            name=_(ctx, "Date of review:"),
-            value=review.created,
-        )
-
-        text_review = textwrap.wrap(review.text_review, 1024)
-        name = _(ctx, "Text:")
-
-        for text in text_review:
-            embed.add_field(name=name, value=text, inline=False)
-            name = "\u200b"
-
-        embed.add_field(name="👍\u200b", value=review.upvotes)
-        embed.add_field(name="👎\u200b", value=review.downvotes)
-
-        return embed
 
     def _get_teacher_review_embed(
         self,
@@ -144,23 +177,53 @@ class Review(commands.Cog):
         delete: bool = False,
     ) -> ReviewEmbed:
         """Create teacher review embed"""
-        if review.anonym and not sudo:
-            name = _(ctx, "Anonymous")
-        else:
-            name = self.bot.get_user(review.author_id) or _(ctx, "Unknown user")
-
-        title = (
-            _(ctx, "Review for teacher #{id}:")
-            if not delete
-            else _(ctx, "Do you want to delete review for teacher #{id}?")
+        return self._create_review_embed(
+            ctx=ctx,
+            review=review,
+            title_template=(
+                _(ctx, "Review for teacher #{id}:")
+                if not delete
+                else _(ctx, "Do you want to delete review for teacher #{id}?")
+            ),
+            title_format={"id": teacher.school_id},
+            description=teacher.name if teacher.name else None,
+            additional_info=_(ctx, "Teacher grade: {grade}").format(grade=review.grade),
+            sudo=sudo,
         )
 
-        title = title.format(id=teacher.school_id)
+    def _create_review_embed(
+        self,
+        ctx: commands.Context,
+        review: ReviewBase,
+        title_template: str,
+        title_format: dict,
+        description: Optional[str],
+        additional_info: str,
+        sudo: bool = False,
+    ) -> ReviewEmbed:
+        """Generic review embed creator for both subjects and teachers.
+
+        Args:
+            ctx: Command context
+            review: Review object (SubjectReview or TeacherReview)
+            title_template: Formatted title string
+            title_format: Format dict for title
+            description: Embed description
+            additional_info: Additional info to display in Review ID field
+            sudo: Whether to reveal anonymous author
+
+        Returns:
+            ReviewEmbed with voting functionality
+        """
+        if review.anonym and not sudo:
+            author_name = _(ctx, "Anonymous")
+        else:
+            author_name = self.bot.get_user(review.author_id) or _(ctx, "Unknown user")
 
         embed = ReviewEmbed(
             author=ctx.author,
-            title=title,
-            description=teacher.name if teacher.name else None,
+            title=title_template.format(**title_format),
+            description=description,
             color=discord.Color.green(),
             url=None,
             review=review,
@@ -169,13 +232,13 @@ class Review(commands.Cog):
 
         embed.add_field(
             name=_(ctx, "Review ID #{id}").format(id=review.idx),
-            value=_(ctx, "Teacher grade: {grade}").format(grade=review.grade),
+            value=additional_info,
             inline=False,
         )
 
         embed.add_field(
             name=_(ctx, "Author:"),
-            value=name,
+            value=author_name,
         )
 
         if review.created != review.updated:
@@ -190,11 +253,11 @@ class Review(commands.Cog):
         )
 
         text_review = textwrap.wrap(review.text_review, 1024)
-        name = _(ctx, "Text:")
+        field_name = _(ctx, "Text:")
 
         for text in text_review:
-            embed.add_field(name=name, value=text, inline=False)
-            name = "\u200b"
+            embed.add_field(name=field_name, value=text, inline=False)
+            field_name = "\u200b"
 
         embed.add_field(name="👍\u200b", value=review.upvotes)
         embed.add_field(name="👎\u200b", value=review.downvotes)
@@ -202,15 +265,50 @@ class Review(commands.Cog):
         return embed
 
     @staticmethod
-    def _split_list(li, n) -> Iterator[List[List]]:
-        """Split list into lists of N items
+    def _split_list(items: List, chunk_size: int) -> Iterator[List]:
+        """Split list into chunks of specified size.
 
         Args:
-            li: List to split
-            n: Number of items in one list
+            items: List to split
+            chunk_size: Number of items in each chunk
         """
-        for i in range(0, len(li), n):
-            yield li[i : i + n]
+        for i in range(0, len(items), chunk_size):
+            yield items[i : i + chunk_size]
+
+    async def _add_review(
+        self,
+        ctx: commands.Context,
+        entity: Union[Subject, Teacher],
+        review_class: Union[Type[SubjectReview], Type[TeacherReview]],
+        grade: int,
+        text: str,
+        anonymous: bool,
+    ) -> Optional[ReviewBase]:
+        """Generic method to add and return a review.
+
+        Args:
+            ctx: Command context
+            entity: Subject or Teacher being reviewed
+            review_class: SubjectReview or TeacherReview class
+            grade: Review grade (1-5)
+            text: Review text content
+            anonymous: Whether review is anonymous
+
+        Returns:
+            Review if success, None otherwise
+        """
+        if anonymous:
+            await utils.discord.delete_message(ctx.message)
+
+        if not await self._validate_grade(ctx, grade):
+            return None
+
+        if not await self._validate_review_text(ctx, text):
+            return None
+
+        return await self._add_or_edit_review(
+            ctx, entity, review_class, grade, anonymous, text
+        )
 
     async def _add_subject_review(
         self,
@@ -220,38 +318,18 @@ class Review(commands.Cog):
         text: str,
         anonymous: bool,
     ) -> Optional[SubjectReview]:
-        """Add and return review.
+        """Add and return subject review.
 
-        Returns: review if success, None otherwise"""
-        subject = Subject.get_by_abbreviation(ctx, abbreviation)
-
-        if anonymous:
-            await utils.discord.delete_message(ctx.message)
-
+        Returns:
+            SubjectReview if success, None otherwise
+        """
+        subject = await self._get_subject_or_reply(ctx, abbreviation)
         if not subject:
-            await ctx.send(
-                _(ctx, "Subject with abbreviation {abbreviation} not found.").format(
-                    abbreviation=abbreviation
-                )
-            )
-            return
+            return None
 
-        if grade < 1 or grade > 5:
-            await ctx.send(_(ctx, "Grade must be between 1 and 5 inclusive."))
-            return
-
-        if text is None or not len(text):
-            await ctx.send(_(ctx, "Review must contain text."))
-            return
-
-        review = SubjectReview.get_member_review(ctx.author, subject)
-
-        if review:
-            review.edit(grade, anonymous, text)
-        else:
-            review = SubjectReview.add(ctx, subject, grade, anonymous, text)
-
-        return review
+        return await self._add_review(
+            ctx, subject, SubjectReview, grade, text, anonymous
+        )
 
     async def _add_teacher_review(
         self,
@@ -261,36 +339,112 @@ class Review(commands.Cog):
         text: str,
         anonymous: bool,
     ) -> Optional[TeacherReview]:
-        """Add and return review.
+        """Add and return teacher review.
 
-        Returns: review if success, None otherwise"""
-        teacher = Teacher.get_by_sid(ctx, teacher_id)
-
-        if anonymous:
-            await utils.discord.delete_message(ctx.message)
-
+        Returns:
+            TeacherReview if success, None otherwise
+        """
+        teacher = await self._get_teacher_or_reply(ctx, teacher_id)
         if not teacher:
-            await ctx.send(
-                _(ctx, "Teacher with ID {id} not found.").format(id=teacher_id)
-            )
-            return
+            return None
 
-        if grade < 1 or grade > 5:
-            await ctx.send(_(ctx, "Grade must be between 1 and 5 inclusive."))
-            return
+        return await self._add_review(
+            ctx, teacher, TeacherReview, grade, text, anonymous
+        )
 
-        if text is None or not len(text):
-            await ctx.send(_(ctx, "Review must contain text."))
-            return
+    async def _add_or_edit_review(
+        self,
+        ctx: commands.Context,
+        entity: Union[Subject, Teacher],
+        review_class: Union[Type[SubjectReview], Type[TeacherReview]],
+        grade: int,
+        anonymous: bool,
+        text: str,
+    ) -> ReviewBase:
+        """Generic method to add or edit a review.
 
-        review = TeacherReview.get_member_review(ctx.author, teacher)
+        Args:
+            ctx: Command context
+            entity: Subject or Teacher being reviewed
+            review_class: SubjectReview or TeacherReview class
+            grade: Review grade (1-5)
+            anonymous: Whether review is anonymous
+            text: Review text content
+
+        Returns:
+            Created or edited review object
+        """
+        review = review_class.get_member_review(ctx.author, entity)
 
         if review:
             review.edit(grade, anonymous, text)
         else:
-            review = TeacherReview.add(ctx, teacher, grade, anonymous, text)
+            review = review_class.add(ctx, entity, grade, anonymous, text)
 
         return review
+
+    async def _confirm_and_delete_review(
+        self,
+        ctx: commands.Context,
+        review: ReviewBase,
+        embed: ReviewEmbed,
+        entity_name: str,
+    ) -> None:
+        """Generic deletion confirmation flow.
+
+        Args:
+            ctx: Command context
+            review: Review to potentially delete
+            embed: Confirmation embed
+            entity_name: Name of entity for logging (e.g., subject abbreviation)
+        """
+        view = ConfirmView(ctx, embed)
+        value = await view.send()
+
+        if value is None:
+            await ctx.send(_(ctx, "Deleting timed out."))
+        elif value:
+            review.delete()
+            await guild_log.info(
+                ctx.author, ctx.channel, f"Removed review for {entity_name}."
+            )
+            await ctx.reply(_(ctx, "Your review was removed."))
+        else:
+            await ctx.send(_(ctx, "Deleting aborted."))
+
+    async def _confirm_and_sudo_delete_review(
+        self,
+        ctx: commands.Context,
+        review: ReviewBase,
+        embed: ReviewEmbed,
+        review_idx: int,
+        entity_name: str,
+    ) -> None:
+        """Generic sudo deletion confirmation flow.
+
+        Args:
+            ctx: Command context
+            review: Review to potentially delete
+            embed: Confirmation embed
+            review_idx: Review ID for logging
+            entity_name: Name of entity for logging
+        """
+        view = ConfirmView(ctx, embed)
+        value = await view.send()
+
+        if value is None:
+            await ctx.send(_(ctx, "Deleting timed out."))
+        elif value:
+            member = self.bot.get_user(review.author_id) or _(ctx, "Unknown user")
+            review.delete()
+            await guild_log.info(
+                ctx.author,
+                ctx.channel,
+                f"Sudo removed review id {review_idx} for {entity_name} by {member}.",
+            )
+            await ctx.reply(_(ctx, "User's review was removed."))
+        else:
+            await ctx.send(_(ctx, "Deleting aborted."))
 
     # Commands
 
@@ -437,12 +591,11 @@ class Review(commands.Cog):
         subject = Subject.get_by_abbreviation(ctx, abbreviation)
 
         if not subject:
-            await ctx.reply(
+            return await ctx.reply(
                 _(ctx, "Subject with abbreviation {abbreviation} not found.").format(
                     abbreviation=abbreviation
                 )
             )
-            return
 
         review = SubjectReview.get_member_review(ctx.author, subject)
 
@@ -460,19 +613,7 @@ class Review(commands.Cog):
             delete=True,
         )
 
-        view = ConfirmView(ctx, embed)
-        value = await view.send()
-
-        if value is None:
-            await ctx.send(_(ctx, "Deleting timed out."))
-        elif value:
-            review.delete()
-            await guild_log.info(
-                ctx.author, ctx.channel, f"Removed review for {subject.abbreviation}."
-            )
-            return await ctx.reply(_(ctx, "Your review was removed."))
-        else:
-            await ctx.send(_(ctx, "Deleting aborted."))
+        await self._confirm_and_delete_review(ctx, review, embed, subject.abbreviation)
 
     @check.acl2(check.ACLevel.SUBMOD)
     @review_subject_.group(name="sudo")
@@ -501,23 +642,9 @@ class Review(commands.Cog):
             delete=True,
         )
 
-        view = ConfirmView(ctx, embed)
-        value = await view.send()
-
-        if value is None:
-            await ctx.send(_(ctx, "Deleting timed out."))
-        elif value:
-            member = self.bot.get_user(review.author_id) or _(ctx, "Unknown user")
-            abbreviation = review.subject.abbreviation
-            review.delete()
-            await guild_log.info(
-                ctx.author,
-                ctx.channel,
-                f"Sudo removed review id {idx} for {abbreviation} by {member}.",
-            )
-            return await ctx.reply(_(ctx, "User's review was removed."))
-        else:
-            await ctx.send(_(ctx, "Deleting aborted."))
+        await self._confirm_and_sudo_delete_review(
+            ctx, review, embed, idx, review.subject.abbreviation
+        )
 
     # TEACHER REVIEW
 
@@ -674,23 +801,10 @@ class Review(commands.Cog):
             ctx=ctx,
             teacher=review.teacher,
             review=review,
-            sudo=True,
             delete=True,
         )
 
-        view = ConfirmView(ctx, embed)
-        value = await view.send()
-
-        if value is None:
-            await ctx.send(_(ctx, "Deleting timed out."))
-        elif value:
-            review.delete()
-            await guild_log.info(
-                ctx.author, ctx.channel, f"Removed review for {teacher.name}."
-            )
-            return await ctx.reply(_(ctx, "Your review was removed."))
-        else:
-            await ctx.send(_(ctx, "Deleting aborted."))
+        await self._confirm_and_delete_review(ctx, review, embed, teacher.name)
 
     @check.acl2(check.ACLevel.SUBMOD)
     @review_teacher_.group(name="sudo")
@@ -719,23 +833,9 @@ class Review(commands.Cog):
             delete=True,
         )
 
-        view = ConfirmView(ctx, embed)
-        value = await view.send()
-
-        if value is None:
-            await ctx.send(_(ctx, "Deleting timed out."))
-        elif value:
-            member = self.bot.get_user(review.author_id) or _(ctx, "Unknown user")
-            name = review.teacher.name
-            review.delete()
-            await guild_log.info(
-                ctx.author,
-                ctx.channel,
-                f"Sudo removed review id {idx} for {name} by {member}.",
-            )
-            return await ctx.reply(_(ctx, "User's review was removed."))
-        else:
-            await ctx.send(_(ctx, "Deleting aborted."))
+        await self._confirm_and_sudo_delete_review(
+            ctx, review, embed, idx, review.teacher.name
+        )
 
 
 async def setup(bot: commands.Bot) -> None:
